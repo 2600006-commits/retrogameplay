@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>프리미엄 출석 명렬표 V12 (한서고등학교)</title>
+  <style>
+    /* 🎨 디자인 시스템 & 다크모드 변수 */
+    :root {
+      --primary: #007AFF; --success: #34C759; --warning: #FF9F0A; --danger: #FF3B30; --default: #FFFFFF;
+      --bg: #F2F2F7; --card: #FFFFFF; --text-main: #1C1C1E; --text-sub: #8E8E93; --border: #E5E5EA; --segment-bg: #E3E3E8;
+      --bg-blur: rgba(242,242,247,0.82);
+      --icon-stroke: 1.8;
+    }
+    body.dark-mode {
+      --bg: #1C1C1E; --card: #2C2C2E; --text-main: #FFFFFF; --text-sub: #98989D; --border: #38383A; --default: #3A3A3C; --segment-bg: #1C1C1E;
+      --bg-blur: rgba(28,28,30,0.82);
+    }
+
+    * { -webkit-tap-highlight-color: transparent; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Pretendard', 'Noto Sans KR', sans-serif; background-color: var(--bg); color: var(--text-main); margin: 0; display: flex; justify-content: center; -webkit-tap-highlight-color: transparent; transition: background-color 0.3s, color 0.3s; letter-spacing: -0.01em; }
+    
+    #app { width: 100%; max-width: 430px; min-height: 100vh; background-color: var(--bg); position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.05); overflow-x: hidden; display: flex; flex-direction: column; }
+
+    .nav-bar { position: fixed; top: 0; width: 100%; max-width: 430px; height: 54px; background: var(--bg-blur); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); display: flex; justify-content: space-between; align-items: center; padding: 0 14px; box-sizing: border-box; z-index: 100; border-bottom: 0.5px solid var(--border); transition: background 0.3s; }
+    .nav-title { font-size: 17px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    .nav-btn { background: none; border: none; font-size: 20px; cursor: pointer; padding: 6px; color: var(--primary); display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; }
+    .nav-btn:active { background: rgba(128,128,128,0.15); }
+    .nav-btn svg { width: 21px; height: 21px; display: block; }
+
+    .view { display: none; padding: 74px 16px 20px 16px; animation: fadeIn 0.3s ease; flex: 1; flex-direction: column; box-sizing: border-box; }
+    .view.active { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .card { background: var(--card); border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; transition: background-color 0.3s; }
+    select, input[type="date"], input[type="text"] { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 16px; margin-bottom: 12px; background-color: var(--card); color: var(--text-main); box-sizing: border-box; }
+    textarea { width: 100%; height: 100px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; margin: 5px 0 15px 0; font-size: 14px; resize: none; background-color: var(--card); color: var(--text-main); }
+    button.primary-btn { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 10px;}
+    button.excel-btn { width: 100%; padding: 14px; background: var(--success); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 10px;}
+    button.outline-btn { width: 100%; padding: 14px; background: transparent; color: var(--text-main); border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
+
+    .segment-control { display: flex; background: var(--segment-bg); border-radius: 8px; padding: 2px; margin-bottom: 12px; }
+    .segment-btn { flex: 1; padding: 8px 0; text-align: center; border: none; background: transparent; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; color: var(--text-sub); position: relative; }
+    .segment-btn.active { background: var(--card); color: var(--text-main); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .tab-delete-badge { position: absolute; top: -6px; right: -4px; width: 17px; height: 17px; border-radius: 50%; background: var(--danger); color: #fff; font-size: 11px; font-weight: 800; line-height: 1; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.25); z-index: 2; }
+    .class-delete-btn { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; border-radius: 50%; background: var(--danger); color: #fff; border: 2px solid var(--card); font-size: 15px; font-weight: 800; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.3); z-index: 2; }
+    .class-delete-btn:active { transform: scale(0.9); }
+    .edit-mode-toggle { background: none; border: none; color: var(--text-sub); font-size: 12px; font-weight: 700; cursor: pointer; padding: 4px 6px; display: flex; align-items: center; gap: 4px; }
+    .edit-mode-toggle.active { color: var(--danger); }
+
+    .grade-stats, .stat-banner { text-align: center; font-size: 13px; font-weight: 600; background: var(--card); padding: 12px 14px; border-radius: 8px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); }
+    .text-danger { color: var(--danger); }
+    .text-success { color: var(--success); }
+    .text-warning { color: var(--warning); }
+    .text-primary { color: var(--primary); }
+    
+    .toolbar { display: flex; gap: 8px; margin-bottom: 15px; }
+    .toolbar button { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text-main); font-size: 13px; font-weight: 600; cursor: pointer; }
+
+    .class-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .class-btn { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-align: left; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; min-height: 125px; box-sizing: border-box; }
+    .class-btn-info { width: 100%; }
+    .class-btn h3 { margin: 0 0 4px 0; font-size: 16px; font-weight: 700; }
+    .class-status { font-size: 12px; color: var(--text-sub); line-height: 1.4; font-weight: 500; margin-bottom: 8px; }
+    .class-stats-box { background: var(--bg); padding: 6px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; text-align: left; line-height: 1.5; width: 100%; box-sizing: border-box; }
+
+    .student-grid { display: grid; gap: 8px; }
+    .student-cell { border-radius: 12px; padding: 10px 2px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; position: relative; border: 1px solid var(--border); -webkit-user-select: none; user-select: none; transition: transform 0.1s; min-height: 65px; display: flex; flex-direction: column; justify-content: center; align-items: center;}
+    .student-cell.active-press { transform: scale(0.92); }
+    .student-num { font-size: 10px; font-weight: bold; pointer-events: none; opacity: 0.7; margin-bottom: 2px;}
+    .student-name { font-size: 14px; font-weight: 700; pointer-events: none; word-break: keep-all; }
+    
+    .state-icon { position: absolute; top: -5px; right: -5px; width: 16px; height: 16px; display: none; pointer-events: none; align-items: center; justify-content: center; background: white; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.25); }
+    .state-icon svg { width: 10px; height: 10px; }
+    .memo-text { font-size: 10px; color: #b45309; background: #fef3c7; border-radius: 4px; padding: 2px 4px; margin-top: 4px; pointer-events: none; width: 95%; box-sizing: border-box; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+    .warning-text { font-size: 9px; color: var(--danger); font-weight: bold; margin-top: 2px; pointer-events: none; }
+
+    .state-0 { background: var(--default); color: var(--text-main); border-color: var(--border); }
+    .state-1 { background: var(--success); color: white; border-color: var(--success); }
+    .state-2 { background: var(--danger); color: white; border-color: var(--danger); }
+    .state-3 { background: var(--warning); color: white; border-color: var(--warning); }
+    .state-4 { background: var(--primary); color: white; border-color: var(--primary); }
+
+    .state-1 .state-icon, .state-2 .state-icon, .state-3 .state-icon, .state-4 .state-icon { display: flex; }
+    .state-1 .state-icon svg { color: var(--success); } .state-2 .state-icon svg { color: var(--danger); }
+    .state-3 .state-icon svg { color: var(--warning); } .state-4 .state-icon svg { color: var(--primary); }
+
+    .dashboard-card { background: #FFF5F5; border: 1px solid #FFDCE0; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+    .dark-mode .dashboard-card { background: #3A1D1D; border-color: #5C2B2B; }
+    .dashboard-title { font-size: 14px; font-weight: bold; color: var(--danger); margin-bottom: 8px; }
+    .dashboard-list { font-size: 13px; color: var(--text-main); line-height: 1.6; }
+
+    .bottom-bar { position: fixed; bottom: 0; width: 100%; max-width: 430px; padding: 14px 16px calc(14px + env(safe-area-inset-bottom)); background: var(--bg-blur); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); display: flex; gap: 12px; box-sizing: border-box; border-top: 0.5px solid var(--border); z-index: 100; transition: background 0.3s;}
+    .bottom-btn { flex: 1; padding: 14px; border-radius: 12px; border: none; font-size: 15px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+    .bottom-btn svg { width: 17px; height: 17px; }
+    .btn-reset { background: var(--segment-bg); color: var(--text-main); } .btn-save { background: var(--primary); color: #fff; }
+
+    .school-logo-footer { text-align: center; padding: 30px 0 100px 0; font-size: 14px; font-weight: 700; color: var(--text-sub); letter-spacing: 1.5px; margin-top: auto; }
+
+    .toast { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 20px; font-size: 14px; z-index: 300; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+    .toast.show { opacity: 1; }
+    .spinner { display: none; font-size: 14px; margin-right: 5px; } .spinner.show { display: inline-block; animation: spin 1s linear infinite; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 150; display: none; opacity: 0; transition: opacity 0.3s; }
+    .overlay.show { display: block; opacity: 1; }
+    .action-sheet { position: fixed; bottom: -100%; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; background: var(--bg); border-radius: 16px 16px 0 0; z-index: 200; transition: bottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); padding-bottom:env(safe-area-inset-bottom); }
+    .action-sheet.show { bottom: 0; }
+
+    .confirm-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.92); width: 84%; max-width: 320px; background: var(--card); border-radius: 16px; padding: 22px 18px 16px; z-index: 250; opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s; box-shadow: 0 8px 30px rgba(0,0,0,0.25); text-align: center; box-sizing: border-box; }
+    .confirm-modal.show { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+    .confirm-modal p { font-size: 14px; line-height: 1.6; margin: 0 0 18px 0; white-space: pre-line; color: var(--text-main); }
+    .confirm-modal .confirm-btns { display: flex; gap: 8px; }
+    .confirm-modal button { flex: 1; padding: 12px; border-radius: 8px; border: none; font-size: 14px; font-weight: 700; cursor: pointer; }
+    .confirm-modal .btn-cancel { background: var(--segment-bg); color: var(--text-main); }
+    .confirm-modal .btn-ok { background: var(--danger); color: #fff; }
+    .sheet-header { padding: 16px; text-align: center; font-weight: 600; border-bottom: 1px solid var(--border); }
+    .sheet-body { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+    .contact-btn { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 16px; border-radius: 12px; text-decoration: none; color: var(--text-main); font-weight: 500; }
+    .memo-area { display: flex; gap: 8px; margin-top: 10px; }
+    .memo-area input { flex: 1; margin-bottom: 0; }
+    .memo-area button { padding: 0 16px; background: var(--text-main); color: var(--bg); border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    
+    .label-title { font-size: 13px; font-weight: bold; color: var(--text-sub); margin-bottom: -4px; margin-top: 8px; }
+
+    .icon-btn { display: inline-flex !important; align-items: center; justify-content: center; gap: 6px; }
+    .ic { display: inline-flex; width: 15px; height: 15px; flex-shrink: 0; }
+    .ic svg { width: 100%; height: 100%; }
+    .spinner .ic, .spinner svg { width: 14px; height: 14px; }
+
+    .search-wrap { position: relative; }
+    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-sub); display: flex; pointer-events: none; }
+    .search-icon svg { width: 17px; height: 17px; }
+
+    .legend-row { display:flex; justify-content:center; gap:12px; font-size:11px; margin-bottom:15px; color:var(--text-sub); font-weight:700; flex-wrap: wrap; }
+    .legend-row span { display: inline-flex; align-items: center; gap: 4px; }
+    .legend-row .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+    /* 🎮 게임 화면 전용 스타일 */
+    #view-game { background: #E0F7FA; display: none; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 100vh; padding: 20px; box-sizing: border-box; }
+    #view-game.active { display: flex; }
+    
+    #game-lobby { width: 100%; max-width: 390px; display: flex; flex-direction: column; align-items: center; margin-top: 10px; }
+    #player-name-input { text-align: center; font-size: 18px; font-weight: bold; border: 2px solid var(--primary); }
+    #leaderboard-container { width: 100%; background: var(--card); border-radius: 12px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-top: 15px; border: 1px solid var(--border); box-sizing: border-box; }
+    .lb-title { text-align: center; font-weight: 800; font-size: 16px; color: #005F73; margin-bottom: 12px; }
+    .lb-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .lb-row:last-child { border-bottom: none; }
+    .lb-rank { width: 30px; font-weight: bold; }
+    .lb-name { flex: 1; font-weight: 600; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+    .lb-score { font-weight: bold; color: var(--primary); margin: 0 10px; }
+    .lb-date { color: var(--text-sub); font-size: 11px; text-align: right; width: 70px; }
+
+    #game-select { width: 100%; max-width: 390px; margin-top: 10px; }
+    .game-select-title { font-size: 22px; font-weight: 900; margin-bottom: 4px; color: #005F73; }
+    .game-select-sub { font-size: 13px; color: #2b6777; margin-bottom: 18px; font-weight: 600; }
+    .game-tile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .game-tile { background: var(--card); border-radius: 20px; padding: 0; cursor: pointer; border: none; text-align: left; overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,0.1); transition: transform 0.15s ease; }
+    .game-tile:active { transform: scale(0.96); }
+    .game-tile-icon { height: 110px; display: flex; align-items: center; justify-content: center; font-size: 48px; }
+    .game-tile-icon.penguin { background: linear-gradient(160deg, #4FC3F7, #0288D1); }
+    .game-tile-icon.card { background: linear-gradient(160deg, #2c3e50, #0e4438); }
+    .game-tile-icon.gameboy { background: linear-gradient(160deg, #6b2d8c, #4a1d63); }
+    .game-tile.wide { grid-column: 1 / -1; }
+    .game-tile.wide .game-tile-icon { height: 70px; }
+    .game-tile-body { padding: 12px 14px 16px; }
+    .game-tile-body h4 { margin: 0 0 4px; font-size: 15px; font-weight: 800; color: var(--text-main); }
+    .game-tile-body p { margin: 0; font-size: 11.5px; color: var(--text-sub); font-weight: 600; line-height: 1.4; }
+    .game-back-btn { background: none; border: none; color: #007AFF; font-size: 14px; font-weight: 700; margin-bottom: 14px; cursor: pointer; padding: 4px 0; display: flex; align-items: center; gap: 4px; }
+
+    #game-play-area { width: 100%; display: none; flex-direction: column; align-items: center; margin-top: 30px; }
+    #gameCanvas { background: #FFFFFF; border: 3px solid #005F73; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: 100%; max-width: 390px; height: 200px; touch-action: none; }
+    .game-instruction { font-size: 13px; color: #005F73; text-align: center; margin-top: 12px; font-weight: bold; line-height: 1.5; background: rgba(255,255,255,0.6); padding: 10px; border-radius: 8px; }
+
+    @media print {
+      @page { size: A4 portrait; margin: 15mm; }
+      body, html { background: white !important; color: black !important; }
+      #app { width: 100% !important; max-width: none !important; box-shadow: none !important; margin: 0 !important; padding: 0 !important; display: block !important; }
+      .nav-bar, .toolbar, .bottom-bar, .segment-control, .school-logo-footer, .excel-btn, #class-stats, #btn-open-seat-modal, #btn-print-seats, #btn-bulk-sms, .stat-banner { display: none !important; }
+      .view { padding: 0 !important; display: none !important; }
+      #view-attendance { display: block !important; }
+      .student-grid { gap: 4px !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      .student-cell { border: 1px solid #000 !important; background: white !important; color: black !important; min-height: 70px !important; box-shadow: none !important; page-break-inside: avoid; }
+      .state-1 { background: #e2e8f0 !important; }
+      .state-2 { border: 2px dashed #ff0000 !important; background: #fff5f5 !important; }
+      .state-3 { background: #fffae6 !important; }
+      .state-4 { background: #ebf8ff !important; }
+      .state-icon, .warning-text { display: none !important; }
+      .memo-text { border: 1px solid #ccc !important; background: transparent !important; color: black !important; padding: 1px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <!-- 상단 네비게이션 바 -->
+  <nav class="nav-bar">
+    <button class="nav-btn" id="nav-left"></button>
+    <div class="nav-title" id="nav-title">출석 체크 명렬표</div>
+    <div style="display:flex; align-items:center;">
+      <span class="spinner" id="loading-spinner"></span>
+      <button class="nav-btn" id="btn-game-toggle" style="margin-right: 2px;" aria-label="게임"></button>
+      <button class="nav-btn" id="btn-theme-toggle" style="margin-right: 2px;" aria-label="테마 전환"></button>
+      <button class="nav-btn" id="nav-right" aria-label="설정"></button>
+    </div>
+  </nav>
+  
+  <!-- ⚙️ 설정(Setup) 뷰 -->
+  <div id="view-setup" class="view">
+    <div class="card">
+      <h3 style="margin-top:0;">📋 학생/비상연락망 명단 등록</h3>
+      <select id="setup-type"><option value="student">학생 명단 등록</option><option value="teacher">비상연락망 등록</option></select>
+      <div id="student-setup-area">
+        <input type="number" id="setup-grade" placeholder="학년 입력 (예: 1)" min="1" inputmode="numeric" />
+        <input type="number" id="setup-class" placeholder="반 입력 (예: 1)" min="1" inputmode="numeric" />
+      </div>
+      <textarea id="excel-input" placeholder="엑셀 복사/붙여넣기 (학번, 이름, 학생전화, 학부모전화)"></textarea>
+      <button class="primary-btn" id="btn-save-list">💾 명단 등록</button>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0;">💬 학부모 안내 문자 템플릿</h3>
+      <div style="font-size:12px; color:var(--text-sub); margin-bottom:10px;">* {이름}, {사유}를 입력하면 자동으로 바뀝니다.</div>
+      <textarea id="sms-template" placeholder="예: 안녕하세요. 오늘 {이름} 학생이 {사유}하여 연락드렸습니다."></textarea>
+      <button class="outline-btn" id="btn-save-template">문자 템플릿 저장</button>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0;">📅 기간 설정 엑셀 다운로드</h3>
+      <input type="date" id="excel-start-date" />
+      <input type="date" id="excel-end-date" />
+      <button class="excel-btn icon-btn" id="btn-export-period-excel"><span class="ic ic-download"></span>기간별 전체 엑셀 다운로드</button>
+    </div>
+    <button class="outline-btn" id="btn-clear-all" style="color:var(--danger); border-color:var(--danger);">데이터 전체 초기화 (주의)</button>
+  </div>
+
+  <!-- 🏠 메인(Home) 뷰 -->
+  <div id="view-home" class="view active">
+    <div class="search-wrap">
+      <span class="search-icon" id="search-icon-slot"></span>
+      <input type="text" id="search-input" placeholder="학생 이름 검색" style="border-radius: 12px; padding-left: 38px;" />
+    </div>
+    <div class="dashboard-card" id="warning-dashboard" style="display:none;">
+      <div class="dashboard-title">🚨 누적 결석 3회 이상 요주의 학생</div>
+      <div class="dashboard-list" id="warning-list"></div>
+    </div>
+    <div class="segment-control" id="segment-control"></div>
+    <div style="display:flex; justify-content:flex-end; margin-top:-6px; margin-bottom:10px;">
+      <button class="edit-mode-toggle" id="btn-toggle-edit-mode">🗑 학년·반 삭제 모드</button>
+    </div>
+    <div id="home-class-area">
+      <div class="toolbar" style="margin-bottom: 10px;">
+        <input type="date" id="home-date" style="margin-bottom:0; flex:1; text-align:center; font-weight:bold;" />
+      </div>
+      <div class="grade-stats" id="grade-total-stats-banner"></div>
+      <div class="class-grid" id="class-grid"></div>
+      <div style="margin-top: 20px;"><button class="excel-btn icon-btn" id="btn-export-excel"><span class="ic ic-chart"></span>전체 누적 출결데이터 다운로드</button></div>
+    </div>
+    <div id="home-emergency-area" style="display:none;">
+      <div class="class-grid" id="teacher-grid"></div>
+    </div>
+    <div class="school-logo-footer">🏫 한서고등학교</div>
+  </div>
+
+  <!-- 📋 출석체크(Attendance) 뷰 -->
+  <div id="view-attendance" class="view" style="padding-bottom: 100px;">
+    <div class="toolbar">
+      <input type="date" id="attendance-date" style="margin-bottom:0; flex:1;" />
+      <button id="btn-export-class-excel" class="icon-btn" style="flex:none; width:auto; background:var(--success); color:white; border:none;"><span class="ic ic-download"></span>반별엑셀</button>
+    </div>
+    <div class="stat-banner" id="class-stats"></div>
+    <div class="toolbar" style="margin-bottom: 15px;">
+      <button id="btn-open-seat-modal" class="icon-btn"><span class="ic ic-shuffle"></span>자리 배치/섞기</button>
+      <button id="btn-print-seats" class="icon-btn" style="background: #5856D6; color: white; border: none;"><span class="ic ic-printer"></span>자리 인쇄</button>
+      <button id="btn-bulk-sms" class="icon-btn" style="color: var(--primary); flex: 0.8;"><span class="ic ic-message"></span>단체문자</button>
+    </div>
+    <div class="legend-row">
+      <span><i class="dot" style="background:var(--default); border:1px solid var(--border);"></i>평소</span>
+      <span class="text-success"><i class="dot" style="background:var(--success);"></i>출석</span>
+      <span class="text-danger"><i class="dot" style="background:var(--danger);"></i>결석</span>
+      <span class="text-warning"><i class="dot" style="background:var(--warning);"></i>지각</span>
+      <span class="text-primary"><i class="dot" style="background:var(--primary);"></i>조퇴</span>
+    </div>
+    <div class="student-grid" id="student-grid"></div>
+    <div class="bottom-bar">
+      <button class="bottom-btn btn-reset" id="btn-reset"><span class="ic ic-refresh"></span>출결 초기화</button>
+      <button class="bottom-btn btn-save" id="btn-save"><span class="ic ic-save"></span>출결 저장하기</button>
+    </div>
+  </div>
+
+  <!-- 🎮 게임(Game) 뷰 -->
+  <div id="view-game" class="view">
+
+    <!-- 게임 선택 허브 -->
+    <div id="game-select">
+      <div class="game-select-title">🎮 쉬는시간 게임 허브</div>
+      <div class="game-select-sub">잠깐의 쉬는 시간, 게임 하나 골라볼까요?</div>
+      <div class="game-tile-grid">
+        <button class="game-tile" id="tile-penguin">
+          <div class="game-tile-icon penguin">🐧</div>
+          <div class="game-tile-body"><h4>남극 펭귄 탈출기</h4><p>물범과 갈매기를 피해 달리는 점프 게임</p></div>
+        </button>
+        <button class="game-tile" id="tile-card">
+          <div class="game-tile-icon card">🃏</div>
+          <div class="game-tile-body"><h4>핸드 크래커</h4><p>포커 족보로 승부하는 로그라이크</p></div>
+        </button>
+        <button class="game-tile wide" id="tile-gameboy">
+          <div class="game-tile-icon gameboy">👾</div>
+          <div class="game-tile-body"><h4>게임보이 에뮬레이터</h4><p>내 게임보이 롬 파일(.gb/.gbc)을 직접 불러와서 플레이하세요</p></div>
+        </button>
+      </div>
+      <button class="outline-btn" id="btn-close-game-select" style="margin-top: 18px; background: var(--card);">명렬표로 돌아가기</button>
+    </div>
+
+    <!-- 게임 로비 화면 (펭귄) -->
+    <div id="game-lobby" style="display:none;">
+      <button class="game-back-btn" id="btn-back-to-select">‹ 게임 목록</button>
+      <div style="font-size: 22px; font-weight: 900; margin-bottom: 10px; color: #005F73;">🐧 남극 펭귄 탈출기</div>
+      <input type="text" id="player-name-input" placeholder="선생님 닉네임 (예: 불꽃주먹)" maxlength="8">
+      <button class="primary-btn" id="btn-start-game" style="font-size: 18px; padding: 16px; background: #FF9500;">🚀 게임 시작</button>
+      
+      <div id="leaderboard-container">
+        <div class="lb-title">🏆 주간 명예의 전당 (Top 10)</div>
+        <div id="lb-list"></div>
+      </div>
+    </div>
+
+    <!-- 실제 게임 플레이 화면 -->
+    <div id="game-play-area">
+      <canvas id="gameCanvas" width="390" height="200"></canvas>
+      <div class="game-instruction">
+        [화면 터치] 또는 [스페이스바] 로 점프!<br>
+        🦭물범과 🐦갈매기를 피해 무사히 생존하세요!
+      </div>
+      <button class="outline-btn" id="btn-quit-game" style="margin-top: 20px; background: white;">중단하고 로비로 가기</button>
+    </div>
+  </div>
+
+  <!-- 오버레이 및 액션 시트 -->
+  <div class="overlay" id="overlay"></div>
+  <div class="confirm-modal" id="confirm-modal">
+    <p id="confirm-modal-text"></p>
+    <div class="confirm-btns">
+      <button class="btn-cancel" id="confirm-modal-cancel">취소</button>
+      <button class="btn-ok" id="confirm-modal-ok">삭제</button>
+    </div>
+  </div>
+  <div class="action-sheet" id="contact-sheet">
+    <div class="sheet-header" id="sheet-name">연락처</div>
+    <div class="sheet-body">
+      <a href="#" class="contact-btn" id="contact-student"><span>📱 학생 연락처</span><span id="contact-student-num">-</span></a>
+      <a href="#" class="contact-btn" id="contact-parent"><span>📞 학부모 연락처</span><span id="contact-parent-num">-</span></a>
+      <a href="#" class="contact-btn" id="sms-parent" style="background:#E5F0FF; color:var(--primary); justify-content:center; font-weight:bold;">💬 학부모 문자 발송</a>
+      <div class="memo-area"><input type="text" id="student-memo-input" placeholder="특이사항 메모 (예: 질병)" /><button id="btn-save-memo">저장</button></div>
+    </div>
+    <div style="margin: 10px 16px 16px 16px; padding: 16px; text-align: center; font-weight: 600; color: var(--danger); cursor: pointer; border: 1px solid var(--danger); border-radius: 12px;" id="btn-close-contact-sheet">닫기</div>
+  </div>
+  <div class="action-sheet" id="seat-sheet">
+    <div class="sheet-header">🔀 교실 자리 배치 설정</div>
+    <div class="sheet-body">
+      <div class="label-title">자리 형태</div><select id="seat-layout-type"><option value="single">한 줄로 앉기</option><option value="pair">짝꿍으로 앉기</option></select>
+      <div class="label-title">가로 칸(열) 수</div><select id="seat-cols"><option value="4">4칸</option><option value="5">5칸</option><option value="6" selected>6칸</option></select>
+      <button class="primary-btn" id="btn-execute-shuffle">🔀 랜덤 자리 섞기</button>
+      <button class="outline-btn" id="btn-execute-sort" style="margin-bottom:0;">🔢 번호순 배치</button>
+    </div>
+    <div style="margin: 10px 16px 16px 16px; padding: 16px; text-align: center; font-weight: 600; color: var(--danger); cursor: pointer; border: 1px solid var(--danger); border-radius: 12px;" id="btn-close-seat-sheet">닫기</div>
+  </div>
+  <div class="action-sheet" id="add-grade-class-sheet">
+    <div class="sheet-header" id="add-sheet-title">➕ 새 학년 추가</div>
+    <div class="sheet-body">
+      <input type="number" id="add-sheet-input" placeholder="숫자를 입력하세요 (예: 3)" min="1" inputmode="numeric" style="text-align:center; font-size:18px; font-weight:bold;" />
+      <button class="primary-btn" id="btn-confirm-add-sheet" style="margin-bottom:0;">확인</button>
+    </div>
+    <div style="margin: 10px 16px 16px 16px; padding: 16px; text-align: center; font-weight: 600; color: var(--danger); cursor: pointer; border: 1px solid var(--danger); border-radius: 12px;" id="btn-close-add-sheet">취소</div>
+  </div>
+  <div class="toast" id="toast"></div>
+</div>
+<script>
+  // 🔗 앱 설정 및 상태 관리
+  const API_URL = "https://script.google.com/macros/s/AKfycbyuSV4SK0M1LwIcjXurfus76RP4a-X09ciRhA4gZKOHE4oGu1ZRxBOM6TfN205dojMwIw/exec";
+  
+  const state = { 
+    currentTab: '1', currentGrade: 1, currentClass: null, 
+    students: [], attendance: {}, memos: {}, 
+    selectedDate: new Date().toLocaleDateString('en-CA'), 
+    currentStudentId: null, 
+    isDarkMode: localStorage.getItem('darkMode') === 'true', 
+    deleteMode: false 
+  };
+  
+  const views = { 
+    setup: document.getElementById('view-setup'), 
+    home: document.getElementById('view-home'), 
+    attendance: document.getElementById('view-attendance'), 
+    game: document.getElementById('view-game') 
+  };
+  
+  const navLeft = document.getElementById('nav-left'); 
+  const navTitle = document.getElementById('nav-title'); 
+  const navRight = document.getElementById('nav-right'); 
+  const spinner = document.getElementById('loading-spinner'); 
+  const statusMap = { 0: '평소', 1: '출석', 2: '결석', 3: '지각', 4: '조퇴' };
+
+  // ==========================================
+  // 🎨 아이콘 시스템 (SF Symbols 스타일 SVG)
+  // ==========================================
+  const svgWrap = (inner) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
+  const ICONS = {
+    list: svgWrap('<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>'),
+    gear: svgWrap('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>'),
+    gamepad: svgWrap('<line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><circle cx="16.5" cy="10.5" r="0.6" fill="currentColor" stroke="none"/><circle cx="18.5" cy="12.5" r="0.6" fill="currentColor" stroke="none"/><rect x="2" y="7" width="20" height="10" rx="5"/>'),
+    moon: svgWrap('<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'),
+    sun: svgWrap('<circle cx="12" cy="12" r="4"/><line x1="12" y1="1.5" x2="12" y2="3.5"/><line x1="12" y1="20.5" x2="12" y2="22.5"/><line x1="4.2" y1="4.2" x2="5.6" y2="5.6"/><line x1="18.4" y1="18.4" x2="19.8" y2="19.8"/><line x1="1.5" y1="12" x2="3.5" y2="12"/><line x1="20.5" y1="12" x2="22.5" y2="12"/><line x1="4.2" y1="19.8" x2="5.6" y2="18.4"/><line x1="18.4" y1="5.6" x2="19.8" y2="4.2"/>'),
+    close: svgWrap('<line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/>'),
+    chevronLeft: svgWrap('<polyline points="15 18 9 12 15 6"/>'),
+    search: svgWrap('<circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>'),
+    download: svgWrap('<path d="M12 3v12"/><polyline points="7 11 12 16 17 11"/><line x1="5" y1="21" x2="19" y2="21"/>'),
+    chart: svgWrap('<line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/>'),
+    shuffle: svgWrap('<polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/>'),
+    printer: svgWrap('<polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>'),
+    message: svgWrap('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'),
+    refresh: svgWrap('<polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15"/>'),
+    save: svgWrap('<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>'),
+    check: svgWrap('<polyline points="20 6 9 17 4 12" fill="none"/>').replace('stroke-width="1.8"','stroke-width="3"'),
+    x: svgWrap('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>').replace('stroke-width="1.8"','stroke-width="3"'),
+    alert: svgWrap('<line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16.5" x2="12" y2="16.51"/><circle cx="12" cy="12" r="9"/>').replace('stroke-width="1.8"','stroke-width="2.8"'),
+    exit: svgWrap('<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>').replace('stroke-width="1.8"','stroke-width="2.6"')
+  };
+  function hydrateIcons() {
+    document.querySelectorAll('.ic').forEach(el => {
+      const key = [...el.classList].find(c => c.startsWith('ic-'));
+      if (!key) return;
+      const map = { 'ic-download':'download','ic-chart':'chart','ic-shuffle':'shuffle','ic-printer':'printer','ic-message':'message','ic-refresh':'refresh','ic-save':'save' };
+      const iconName = map[key];
+      if (iconName && ICONS[iconName]) el.innerHTML = ICONS[iconName];
+    });
+    const searchSlot = document.getElementById('search-icon-slot');
+    if (searchSlot) searchSlot.innerHTML = ICONS.search;
+  }
+  document.getElementById('btn-game-toggle').innerHTML = ICONS.gamepad;
+  document.getElementById('nav-right').innerHTML = ICONS.gear;
+  document.getElementById('loading-spinner').innerHTML = ICONS.refresh;
+  hydrateIcons();
+  
+  document.getElementById('home-date').value = state.selectedDate; 
+  document.getElementById('attendance-date').value = state.selectedDate;
+  
+  document.getElementById('btn-theme-toggle').innerHTML = state.isDarkMode ? ICONS.sun : ICONS.moon;
+  if(state.isDarkMode) { 
+    document.body.classList.add('dark-mode'); 
+  }
+
+  document.getElementById('btn-theme-toggle').addEventListener('click', () => { 
+    state.isDarkMode = !state.isDarkMode; 
+    document.body.classList.toggle('dark-mode', state.isDarkMode); 
+    document.getElementById('btn-theme-toggle').innerHTML = state.isDarkMode ? ICONS.sun : ICONS.moon; 
+    localStorage.setItem('darkMode', state.isDarkMode); 
+  });
+  
+  function showToast(msg) { 
+    const toast = document.getElementById('toast'); 
+    toast.textContent = msg; toast.classList.add('show'); 
+    setTimeout(() => toast.classList.remove('show'), 2000); 
+  }
+
+  function switchView(viewName) {
+    Object.values(views).forEach(v => v.classList.remove('active')); 
+    views[viewName].classList.add('active');
+    
+    if (viewName === 'game') {
+      navLeft.style.visibility = 'visible'; navLeft.innerHTML = ICONS.chevronLeft; 
+      navTitle.textContent = '쉬는시간 미니게임'; navRight.style.display = 'none';
+      openGameHub(); 
+    } else {
+      stopMiniGame(); 
+      if (viewName === 'setup') { 
+        navLeft.style.visibility = 'visible'; navLeft.innerHTML = ICONS.close; 
+        navTitle.textContent = '설정 및 등록'; navRight.style.display = 'none'; 
+      } else if (viewName === 'home') { 
+        navLeft.style.visibility = 'hidden'; navTitle.textContent = '출석 체크 명렬표'; 
+        navRight.style.display = 'inline-flex'; navRight.innerHTML = ICONS.gear; 
+        updateDashboard(); 
+      } else if (viewName === 'attendance') { 
+        navLeft.style.visibility = 'visible'; navLeft.innerHTML = ICONS.chevronLeft; 
+        navTitle.textContent = `${state.currentGrade}학년 ${state.currentClass}반`; 
+        navRight.style.display = 'none'; 
+      }
+    }
+  }
+
+  function safeParse(key, defaultVal = null) { 
+    try { 
+      let val = localStorage.getItem(key); 
+      if (!val) return defaultVal; 
+      let parsed = JSON.parse(val); 
+      if (typeof parsed === 'string') parsed = JSON.parse(parsed); 
+      return parsed; 
+    } catch (e) { return defaultVal; } 
+  }
+  
+  const CLOUD_SYNCED_PREFIXES = ["students_", "attendance_", "memo_", "seat_"];
+  const CLOUD_SYNCED_KEYS = ["teachers_list", "penguin_leaderboard"];
+  function isCloudSyncedKey(k) { return CLOUD_SYNCED_PREFIXES.some(p => k.startsWith(p)) || CLOUD_SYNCED_KEYS.includes(k); }
+
+  async function loadFromCloud() {
+    if (!API_URL || API_URL.startsWith("여기에")) return;
+    try { 
+      spinner.classList.add('show'); 
+      const res = await fetch(`${API_URL}?t=${Date.now()}`); 
+      const data = await res.json();
+      if (data) { 
+        // ⚠️ 클라우드를 기준(source of truth)으로 동기화한다.
+        // 그렇지 않으면, 이전에 삭제했지만 아직 클라우드에는 반영되지 않았던
+        // "유령" 데이터가 남아있다가 여기서 다시 덮어써지며 삭제가 무효화되는 문제가 생긴다.
+        // 클라우드 응답에 없는 키는 로컬에서도 함께 제거해준다.
+        const cloudKeys = new Set(Object.keys(data)); 
+        const localKeysToPrune = []; 
+        for (let i = 0; i < localStorage.length; i++) { 
+          const k = localStorage.key(i); 
+          if (isCloudSyncedKey(k) && !cloudKeys.has(k)) localKeysToPrune.push(k); 
+        } 
+        localKeysToPrune.forEach(k => localStorage.removeItem(k)); 
+
+        Object.keys(data).forEach(k => { 
+          let val = data[k]; 
+          if (typeof val === 'object' && val !== null) localStorage.setItem(k, JSON.stringify(val)); 
+          else if (typeof val === 'string') localStorage.setItem(k, val); 
+        }); 
+      }
+    } catch (e) { showToast("⚠️ 로컬 모드"); } 
+    finally { spinner.classList.remove('show'); }
+  }
+  
+  async function saveToCloud() {
+    if (!API_URL || API_URL.startsWith("여기에")) return true; 
+    try { 
+      spinner.classList.add('show'); const all = {};
+      for (let i = 0; i < localStorage.length; i++) { 
+        const k = localStorage.key(i); 
+        if (isCloudSyncedKey(k)) { 
+          all[k] = safeParse(k); 
+        }
+      }
+      await fetch(API_URL, { method: "POST", body: JSON.stringify(all) }); 
+      showToast("☁️ 클라우드 저장 완료");
+      return true; 
+    } catch (e) { showToast("❌ 클라우드 저장 실패 (인터넷 연결을 확인해주세요)"); return false; } 
+    finally { spinner.classList.remove('show'); }
+  }
+
+  function getStudentTotalAbsence(id) { 
+    let count = 0; 
+    for(let i=0; i<localStorage.length; i++) { 
+      const k = localStorage.key(i); 
+      if(k.startsWith(`attendance_`)) { 
+        const att = safeParse(k, {}); 
+        if(att && att[id] === 2) count++; 
+      } 
+    } 
+    return count; 
+  }
+  
+  function updateDashboard() { 
+    const list = document.getElementById('warning-list'); list.innerHTML = ''; let hasWarning = false; 
+    for(let i=0; i<localStorage.length; i++) { 
+      const k = localStorage.key(i); 
+      if(k.startsWith('students_')) { 
+        const parts = k.split('_'); const grade = parts[1]; const cNum = parts[2]; 
+        const stds = safeParse(k, []); 
+        if (Array.isArray(stds)) { 
+          stds.forEach(s => { 
+            const abs = getStudentTotalAbsence(s['일련번호']); 
+            if(abs >= 3) { hasWarning = true; list.innerHTML += `<div>• ${grade}학년 ${cNum}반 ${s['이름']} (결석 ${abs}회)</div>`; } 
+          }); 
+        } 
+      } 
+    } 
+    document.getElementById('warning-dashboard').style.display = hasWarning ? 'block' : 'none'; 
+  }
+
+  document.getElementById('search-input').addEventListener('input', (e) => { 
+    const val = e.target.value.trim(); 
+    if(!val) { initHome(); return; } 
+    document.getElementById('home-class-area').style.display = 'block'; 
+    const grid = document.getElementById('class-grid'); grid.innerHTML = ''; grid.style.gridTemplateColumns = '1fr'; 
+    document.getElementById('grade-total-stats-banner').style.display = 'none'; 
+    const results = []; 
+    for(let i=0; i<localStorage.length; i++) { 
+      const k = localStorage.key(i); 
+      if(k.startsWith('students_')) { 
+        const parts = k.split('_'); const grade = parts[1]; const cNum = parts[2]; 
+        const stds = safeParse(k, []); 
+        if (Array.isArray(stds)) { 
+          stds.forEach(s => { 
+            if(s['이름'] && s['이름'].includes(val)) results.push({ grade, cNum, student: s }); 
+          }); 
+        } 
+      } 
+    } 
+    // localStorage 키 순서는 저장된 순서일 뿐 숫자 순서가 아니므로, 검색 결과도 학년 > 반 > 번호 순으로 정렬한다.
+    results.sort((a, b) => 
+      (parseInt(a.grade) - parseInt(b.grade)) || 
+      (parseInt(a.cNum) - parseInt(b.cNum)) || 
+      (parseInt(a.student['일련번호']) - parseInt(b.student['일련번호'])) 
+    ); 
+    results.forEach(({ grade, cNum, student: s }) => { 
+      const btn = document.createElement('div'); btn.className = 'class-btn'; btn.style.minHeight = 'auto'; 
+      const abs = getStudentTotalAbsence(s['일련번호']); 
+      btn.innerHTML = `<div class="class-btn-info"><h3>${s['이름']}</h3><div class="class-status">${grade}학년 ${cNum}반 ${s['일련번호']}번 | 누적결석: <span class="text-danger">${abs}회</span></div></div>`; 
+      btn.addEventListener('click', () => openAttendance(grade, cNum)); grid.appendChild(btn); 
+    }); 
+  });
+  
+  document.getElementById('btn-save-list').addEventListener('click', async () => { 
+    const type = document.getElementById('setup-type').value; 
+    const raw = document.getElementById('excel-input').value; 
+    if (!raw.trim()) return alert("데이터 없음"); 
+    if (type === 'student') { 
+      const g = document.getElementById('setup-grade').value.trim(); 
+      const c = document.getElementById('setup-class').value.trim(); 
+      if (!g || !c) return alert("학년과 반을 숫자로 입력해주세요."); 
+      const parsed = raw.trim().split('\n').map(line => { 
+        const t = line.split('\t').map(x=>x.trim()); 
+        return { '일련번호': t[0]||'', '이름': t[1]||'', '전화번호': t[2]||'', '추가전화번호': t[3]||'' }; 
+      }); 
+      localStorage.setItem(`students_${g}_${c}`, JSON.stringify(parsed)); 
+    } else { 
+      const parsed = raw.trim().split('\n').map(line => { 
+        const t = line.split('\t').map(x=>x.trim()); 
+        return { '이름': t[0]||'', '전화번호': t[1]||'' }; 
+      }); 
+      localStorage.setItem(`teachers_list`, JSON.stringify(parsed)); 
+    } 
+    await saveToCloud(); 
+    document.getElementById('excel-input').value = ''; 
+    showToast('명단 저장됨'); initHome(); 
+  });
+  
+  document.getElementById('btn-save-template').addEventListener('click', () => { 
+    localStorage.setItem('sms_template', document.getElementById('sms-template').value); 
+    showToast('템플릿 저장됨'); 
+  }); 
+  
+  document.getElementById('sms-template').value = localStorage.getItem('sms_template') || '안녕하세요. 오늘 {이름} 학생이 {사유}하여 연락드렸습니다.';
+  
+  document.getElementById('home-date').addEventListener('change', (e) => { 
+    state.selectedDate = e.target.value; 
+    document.getElementById('attendance-date').value = state.selectedDate; 
+    renderClassGrid(); 
+  });
+  
+  function getAllGrades() { 
+    const set = new Set(); 
+    for (let i = 0; i < localStorage.length; i++) { 
+      const k = localStorage.key(i); 
+      if (k.startsWith('students_')) { 
+        const parts = k.split('_'); 
+        if (parts[1]) set.add(parts[1]); 
+      } 
+    } 
+    if (set.size === 0) set.add('1'); 
+    return Array.from(set).sort((a, b) => parseInt(a) - parseInt(b)); 
+  }
+
+  function getGradeClasses(grade) { 
+    const set = new Set(); 
+    for (let i = 0; i < localStorage.length; i++) { 
+      const k = localStorage.key(i); 
+      if (k.startsWith(`students_${grade}_`)) { 
+        const parts = k.split('_'); 
+        if (parts[1] === String(grade) && parts[2]) set.add(parts[2]); 
+      } 
+    } 
+    if (set.size === 0) set.add('1'); 
+    return Array.from(set).sort((a, b) => parseInt(a) - parseInt(b)); 
+  }
+
+  let addSheetType = null; 
+
+  function openAddSheet(type) { 
+    addSheetType = type; 
+    document.getElementById('add-sheet-title').textContent = type === 'grade' ? '➕ 새 학년 추가' : `➕ ${state.currentGrade}학년에 새 반 추가`; 
+    const input = document.getElementById('add-sheet-input'); 
+    input.value = ''; 
+    document.getElementById('overlay').classList.add('show'); 
+    document.getElementById('add-grade-class-sheet').classList.add('show'); 
+    setTimeout(() => input.focus(), 300); 
+  }
+
+  function addNewGrade() { openAddSheet('grade'); }
+
+  function addNewClass() { openAddSheet('class'); }
+
+  document.getElementById('btn-confirm-add-sheet').addEventListener('click', () => { 
+    const raw = document.getElementById('add-sheet-input').value.trim(); 
+    const num = parseInt(raw); 
+    if (!raw || isNaN(num) || num <= 0) { alert('올바른 숫자를 입력해주세요.'); return; } 
+    closeAllPopups(); 
+    if (addSheetType === 'grade') { 
+      document.getElementById('setup-grade').value = num; 
+      document.getElementById('setup-class').value = 1; 
+      switchView('setup'); 
+      showToast(`${num}학년 첫 반의 명단을 등록해주세요.`); 
+    } else { 
+      document.getElementById('setup-grade').value = state.currentGrade; 
+      document.getElementById('setup-class').value = num; 
+      switchView('setup'); 
+      showToast(`${state.currentGrade}학년 ${num}반 명단을 등록해주세요.`); 
+    } 
+  });
+
+  document.getElementById('add-sheet-input').addEventListener('keydown', (e) => { 
+    if (e.key === 'Enter') { e.preventDefault(); document.getElementById('btn-confirm-add-sheet').click(); } 
+  });
+
+  document.getElementById('btn-close-add-sheet').addEventListener('click', closeAllPopups);
+
+  function collectGradeKeys(grade) { 
+    const keys = []; const g = String(grade); 
+    for (let i = 0; i < localStorage.length; i++) { 
+      const k = localStorage.key(i); const parts = k.split('_'); 
+      if ((parts[0] === 'students' || parts[0] === 'attendance' || parts[0] === 'memo') && parts[1] === g) { 
+        keys.push(k); 
+      } else if (parts[0] === 'seat' && (parts[1] === 'cols' || parts[1] === 'layout') && parts[2] === g) { 
+        keys.push(k); 
+      } 
+    } 
+    return keys; 
+  }
+
+  function collectClassKeys(grade, classNum) { 
+    const keys = []; const g = String(grade), c = String(classNum); 
+    for (let i = 0; i < localStorage.length; i++) { 
+      const k = localStorage.key(i); const parts = k.split('_'); 
+      if ((parts[0] === 'students' || parts[0] === 'attendance' || parts[0] === 'memo') && parts[1] === g && parts[2] === c) { 
+        keys.push(k); 
+      } else if (parts[0] === 'seat' && (parts[1] === 'cols' || parts[1] === 'layout') && parts[2] === g && parts[3] === c) { 
+        keys.push(k); 
+      } 
+    } 
+    return keys; 
+  }
+
+  async function deleteGrade(grade) { 
+    if (!(await showConfirm(`${grade}학년 전체(모든 반)의 명단과 출결 데이터를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`))) return; 
+    collectGradeKeys(grade).forEach(k => localStorage.removeItem(k)); 
+    state.currentTab = '1'; initHome(); updateDashboard(); 
+    // saveToCloud()가 실패하면(오프라인 등) 자체적으로 실패 토스트를 띄운다.
+    // 이 경우 클라우드에는 아직 삭제 전 데이터가 남아있으므로, 인터넷이 연결되면 다시 삭제를 시도해야 한다.
+    await saveToCloud(); 
+  }
+
+  async function deleteClass(grade, classNum) { 
+    if (!(await showConfirm(`${grade}학년 ${classNum}반의 명단과 출결 데이터를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`))) return; 
+    collectClassKeys(grade, classNum).forEach(k => localStorage.removeItem(k)); 
+    renderClassGrid(); updateDashboard(); 
+    await saveToCloud(); 
+  }
+
+  function renderSegmentControl() { 
+    const grades = getAllGrades(); 
+    if (state.currentTab !== 'emergency' && !grades.includes(state.currentTab)) { 
+      state.currentTab = grades[0]; 
+    } 
+    const container = document.getElementById('segment-control'); 
+    container.innerHTML = ''; 
+    grades.forEach(g => { 
+      const btn = document.createElement('button'); 
+      btn.className = 'segment-btn' + (state.currentTab === g ? ' active' : ''); 
+      btn.dataset.tab = g; 
+      btn.textContent = g + '학년'; 
+      if (state.deleteMode) { 
+        const badge = document.createElement('span'); 
+        badge.className = 'tab-delete-badge'; badge.textContent = '×'; badge.title = '학년 삭제'; 
+        badge.addEventListener('click', (e) => { e.stopPropagation(); deleteGrade(g); }); 
+        btn.appendChild(badge); 
+      } 
+      btn.addEventListener('click', (e) => { 
+        if (e.target.classList.contains('tab-delete-badge')) return; 
+        state.currentTab = g; initHome(); 
+      }); 
+      container.appendChild(btn); 
+    }); 
+    if (!state.deleteMode) { 
+      const addBtn = document.createElement('button'); 
+      addBtn.className = 'segment-btn'; addBtn.style.flex = '0.7'; 
+      addBtn.textContent = '+ 학년'; 
+      addBtn.addEventListener('click', addNewGrade); 
+      container.appendChild(addBtn); 
+    } 
+    const emgBtn = document.createElement('button'); 
+    emgBtn.className = 'segment-btn' + (state.currentTab === 'emergency' ? ' active' : ''); 
+    emgBtn.dataset.tab = 'emergency'; emgBtn.textContent = '비상연락망'; 
+    emgBtn.addEventListener('click', () => { state.currentTab = 'emergency'; initHome(); }); 
+    container.appendChild(emgBtn); 
+  }
+
+  document.getElementById('btn-toggle-edit-mode').addEventListener('click', () => { 
+    state.deleteMode = !state.deleteMode; 
+    const toggleBtn = document.getElementById('btn-toggle-edit-mode'); 
+    toggleBtn.textContent = state.deleteMode ? '✅ 삭제 모드 종료' : '🗑 학년·반 삭제 모드'; 
+    toggleBtn.classList.toggle('active', state.deleteMode); 
+    renderSegmentControl(); 
+    if (state.currentTab !== 'emergency') renderClassGrid(); 
+  });
+
+  function initHome() { 
+    switchView('home'); 
+    renderSegmentControl(); 
+    if (state.currentTab === 'emergency') { 
+      document.getElementById('home-class-area').style.display = 'none'; 
+      document.getElementById('home-emergency-area').style.display = 'block'; 
+    } else { 
+      document.getElementById('home-class-area').style.display = 'block'; 
+      document.getElementById('home-emergency-area').style.display = 'none'; 
+      document.getElementById('grade-total-stats-banner').style.display = 'flex'; 
+      state.currentGrade = parseInt(state.currentTab); 
+      renderClassGrid(); 
+    } 
+  }
+  
+  
+  function renderClassGrid() { 
+    const grid = document.getElementById('class-grid'); 
+    if(!grid) return; grid.innerHTML = ''; grid.style.gridTemplateColumns = 'repeat(2, 1fr)'; 
+    let gradeStats = { total: 0, p: 0, a: 0, l: 0, e: 0, n: 0 }; 
+    const classNums = getGradeClasses(state.currentGrade); 
+    classNums.forEach(i => { 
+      const btn = document.createElement('div'); btn.className = 'class-btn'; 
+      const stds = safeParse(`students_${state.currentGrade}_${i}`, null); 
+      if(stds && Array.isArray(stds)) { 
+        const att = safeParse(`attendance_${state.currentGrade}_${i}_${state.selectedDate}`, {}); 
+        let stats = { t: stds.length, p: 0, a: 0, l: 0, e: 0, n: 0 }; 
+        stds.forEach(s => { 
+          if(s && s['일련번호']) { 
+            const st = att[s['일련번호']] || 0; 
+            if(st === 1) stats.p++; else if(st === 2) stats.a++; else if(st === 3) stats.l++; else if(st === 4) stats.e++; else stats.n++; 
+          } 
+        }); 
+        gradeStats.total += stats.t; gradeStats.p += stats.p; gradeStats.a += stats.a; gradeStats.l += stats.l; gradeStats.e += stats.e; gradeStats.n += stats.n; 
+        btn.style.position = 'relative'; 
+        btn.innerHTML = `<div class="class-btn-info"><h3>${i}반</h3><div class="class-status" style="color:var(--primary)">입장 체크 ➔</div></div><div class="class-stats-box">총 <strong>${stats.t}명</strong><br><span class="text-success">출석 ${stats.p}</span> | <span class="text-danger">결석 ${stats.a}</span><br><span class="text-warning">지각 ${stats.l}</span> | <span class="text-primary">조퇴 ${stats.e}</span><br><span style="color:var(--text-sub); font-size:10px;">미입력 ${stats.n}명</span></div>`; 
+        if (state.deleteMode) { 
+          const delBtn = document.createElement('button'); 
+          delBtn.className = 'class-delete-btn'; delBtn.title = '반 삭제'; delBtn.textContent = '×'; 
+          delBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteClass(state.currentGrade, i); }); 
+          btn.appendChild(delBtn); 
+        } 
+      } else { 
+        btn.innerHTML = `<div class="class-btn-info"><h3>${i}반</h3><div class="class-status" style="opacity:0.5">명단 미등록</div></div>`; 
+      } 
+      btn.addEventListener('click', (e) => { 
+        if (e.target.classList.contains('class-delete-btn')) return; 
+        openAttendance(state.currentGrade, i); 
+      }); 
+      grid.appendChild(btn); 
+    }); 
+    const addBtn = document.createElement('div'); 
+    addBtn.className = 'class-btn'; 
+    addBtn.style.cssText = 'align-items:center; justify-content:center; text-align:center; cursor:pointer; border-style:dashed; min-height:125px;'; 
+    addBtn.innerHTML = `<div style="font-size:26px; color:var(--primary); font-weight:700;">＋</div><div style="font-size:12px; color:var(--text-sub); margin-top:4px; font-weight:600;">새 반 추가</div>`; 
+    addBtn.addEventListener('click', addNewClass); 
+    grid.appendChild(addBtn); 
+    document.getElementById('grade-total-stats-banner').innerHTML = `<span><strong>${state.currentGrade}학년 총계:</strong> <strong style="color:var(--text-main);">${gradeStats.total}명</strong></span><span style="font-size:12px;"><span class="text-success">출 ${gradeStats.p}</span> · <span class="text-danger">결 ${gradeStats.a}</span> · <span class="text-warning">지 ${gradeStats.l}</span> · <span class="text-primary">조 ${gradeStats.e}</span><br><span style="color:var(--text-sub); font-size:11px; margin-top:2px; display:inline-block;">(미입력 ${gradeStats.n}명)</span></span>`; 
+  }
+  
+  const dateInput = document.getElementById('attendance-date'); 
+  dateInput.addEventListener('change', (e) => { 
+    state.selectedDate = e.target.value; 
+    document.getElementById('home-date').value = state.selectedDate; 
+    reloadDayData(); 
+  });
+  
+  async function openAttendance(grade, classNum) { 
+    const stds = safeParse(`students_${grade}_${classNum}`, null); 
+    if (!stds || stds.length === 0) { alert("명단이 없습니다. [설정]에서 엑셀을 등록해주세요."); return; } 
+    state.currentGrade = grade; state.currentClass = classNum; state.students = stds; 
+    dateInput.value = state.selectedDate; reloadDayData(); switchView('attendance'); 
+  }
+  
+  function reloadDayData() { 
+    state.attendance = safeParse(`attendance_${state.currentGrade}_${state.currentClass}_${state.selectedDate}`, {}); 
+    state.memos = safeParse(`memo_${state.currentGrade}_${state.currentClass}_${state.selectedDate}`, {}); 
+    renderAttendanceGrid(); 
+  }
+  
+  function renderAttendanceGrid() { 
+    const grid = document.getElementById('student-grid'); 
+    if(!grid) return; grid.innerHTML = ''; 
+    let stats = { t: state.students.length, p:0, a:0, l:0, e:0 }; 
+    const cols = parseInt(localStorage.getItem(`seat_cols_${state.currentGrade}_${state.currentClass}`) || 6); 
+    const layout = localStorage.getItem(`seat_layout_${state.currentGrade}_${state.currentClass}`) || 'single'; 
+    if (layout === 'pair') { 
+      let tracks = []; 
+      for (let i = 1; i <= cols; i++) { tracks.push('1fr'); if (i % 2 === 0 && i < cols) tracks.push('16px'); } 
+      grid.style.gridTemplateColumns = tracks.join(' '); 
+    } else { 
+      grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`; 
+    } 
+    let currentVisualCol = 0; 
+    state.students.forEach(student => { 
+      const id = student['일련번호']; const status = state.attendance[id] || 0; 
+      if(status===1) stats.p++; else if(status===2) stats.a++; else if(status===3) stats.l++; else if(status===4) stats.e++; 
+      const absCount = getStudentTotalAbsence(id); 
+      const warningHTML = absCount >= 3 ? `<div class="warning-text">🚨결석 ${absCount}회</div>` : ''; 
+      const memoHTML = state.memos[id] ? `<div class="memo-text">${state.memos[id]}</div>` : ''; 
+      const stateIconMap = { 1: ICONS.check, 2: ICONS.x, 3: ICONS.alert, 4: ICONS.exit };
+      const cell = document.createElement('div'); cell.className = `student-cell state-${status}`; 
+      cell.innerHTML = `<div class="student-num">${id}번</div><div class="student-name">${student['이름']}</div>${warningHTML}${memoHTML}<div class="state-icon">${stateIconMap[status] || ''}</div>`; 
+      let pressTimer; let isLongPress = false; 
+      cell.addEventListener('pointerdown', () => { 
+        isLongPress = false; cell.classList.add('active-press'); 
+        pressTimer = setTimeout(() => { isLongPress = true; showContactPopup(student, status); }, 800); 
+      }); 
+      const cancel = () => { clearTimeout(pressTimer); cell.classList.remove('active-press'); }; 
+      cell.addEventListener('pointerup', () => { cancel(); if(!isLongPress) { state.attendance[id] = (status + 1) % 5; renderAttendanceGrid(); } }); 
+      cell.addEventListener('pointerleave', cancel); cell.addEventListener('pointercancel', cancel); 
+      grid.appendChild(cell); currentVisualCol++; 
+      if (layout === 'pair' && currentVisualCol % 2 === 0 && currentVisualCol < cols) { const spacer = document.createElement('div'); grid.appendChild(spacer); } 
+      if (currentVisualCol >= cols) currentVisualCol = 0; 
+    }); 
+    document.getElementById('class-stats').innerHTML = `<span>총 인원: <strong>${stats.t}명</strong></span> <span><span class="text-success">출석 ${stats.p}</span> | <span class="text-danger">결석 ${stats.a}</span> | <span class="text-warning">지각 ${stats.l}</span> | <span class="text-primary">조퇴 ${stats.e}</span></span>`; 
+  }
+  
+  document.getElementById('btn-open-seat-modal').addEventListener('click', () => { 
+    document.getElementById('seat-cols').value = localStorage.getItem(`seat_cols_${state.currentGrade}_${state.currentClass}`) || '6'; 
+    document.getElementById('seat-layout-type').value = localStorage.getItem(`seat_layout_${state.currentGrade}_${state.currentClass}`) || 'single'; 
+    document.getElementById('overlay').classList.add('show'); document.getElementById('seat-sheet').classList.add('show'); 
+  });
+  
+  document.getElementById('btn-execute-shuffle').addEventListener('click', () => { 
+    const layout = document.getElementById('seat-layout-type').value; 
+    const cols = document.getElementById('seat-cols').value; 
+    localStorage.setItem(`seat_layout_${state.currentGrade}_${state.currentClass}`, layout); 
+    localStorage.setItem(`seat_cols_${state.currentGrade}_${state.currentClass}`, cols); 
+    state.students.sort(() => Math.random() - 0.5); 
+    localStorage.setItem(`students_${state.currentGrade}_${state.currentClass}`, JSON.stringify(state.students)); 
+    renderAttendanceGrid(); saveToCloud(); closeAllPopups(); showToast('새로운 자리로 배치되었습니다.'); 
+  });
+  
+  document.getElementById('btn-execute-sort').addEventListener('click', () => { 
+    const layout = document.getElementById('seat-layout-type').value; 
+    const cols = document.getElementById('seat-cols').value; 
+    localStorage.setItem(`seat_layout_${state.currentGrade}_${state.currentClass}`, layout); 
+    localStorage.setItem(`seat_cols_${state.currentGrade}_${state.currentClass}`, cols); 
+    state.students.sort((a, b) => parseInt(a['일련번호']) - parseInt(b['일련번호'])); 
+    localStorage.setItem(`students_${state.currentGrade}_${state.currentClass}`, JSON.stringify(state.students)); 
+    renderAttendanceGrid(); saveToCloud(); closeAllPopups(); showToast('번호순으로 재배치되었습니다.'); 
+  });
+  
+  document.getElementById('btn-print-seats').addEventListener('click', () => { window.print(); });
+  
+  document.getElementById('btn-bulk-sms').addEventListener('click', () => { 
+    let numbers = []; 
+    state.students.forEach(s => { 
+      const st = state.attendance[s['일련번호']] || 0; 
+      if((st === 2 || st === 3 || st === 4) && s['추가전화번호']) numbers.push(s['추가전화번호'].replace(/[^0-9]/g,'')); 
+    }); 
+    if(numbers.length === 0) return alert('결석/지각/조퇴 처리된 학생 중 학부모 연락처가 있는 학생이 없습니다.'); 
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent); 
+    const bodyText = encodeURIComponent(`안녕하세요. ${state.currentGrade}학년 ${state.currentClass}반 담임입니다. 자녀의 출결 관련하여 확인 부탁드립니다.`); 
+    window.location.href = `sms:${numbers.join(',')}${isIOS ? '&' : '?'}body=${bodyText}`; 
+  });
+  
+  document.getElementById('btn-reset').addEventListener('click', async () => { 
+    if (await showConfirm('이 반의 출결 상태를 모두 "평소"로 초기화하시겠습니까?', '초기화')) { 
+      state.students.forEach(s => state.attendance[s['일련번호']] = 0); 
+      renderAttendanceGrid(); 
+    } 
+  });
+  
+  document.getElementById('btn-save').addEventListener('click', async () => { 
+    localStorage.setItem(`attendance_${state.currentGrade}_${state.currentClass}_${state.selectedDate}`, JSON.stringify(state.attendance)); 
+    localStorage.setItem(`memo_${state.currentGrade}_${state.currentClass}_${state.selectedDate}`, JSON.stringify(state.memos)); 
+    await saveToCloud(); initHome(); 
+  });
+  
+  function exportExcel(mode = 'all') { 
+    let startD = "0000-00-00", endD = "9999-99-99"; 
+    if (mode === 'period') { 
+      startD = document.getElementById('excel-start-date').value; endD = document.getElementById('excel-end-date').value; 
+      if(!startD || !endD) return alert('시작일과 종료일을 선택하세요.'); 
+    } 
+    let csv = '\uFEFF날짜,시간,학번,이름,출결사항,특이사항\n'; 
+    const nowTime = new Date().toLocaleTimeString('ko-KR', { hour12: false, hour: '2-digit', minute: '2-digit' }); 
+    for(let i=0; i<localStorage.length; i++) { 
+      const key = localStorage.key(i); 
+      if(key.startsWith('attendance_')) { 
+        const parts = key.split('_'); const grade = parts[1]; const classNum = parts[2]; const date = parts.slice(3).join('_'); 
+        if (mode === 'class' && (grade !== String(state.currentGrade) || classNum !== String(state.currentClass))) continue; 
+        if (mode === 'period' && (date < startD || date > endD)) continue; 
+        const stds = safeParse(`students_${grade}_${classNum}`, []); 
+        const att = safeParse(key, {}); const mem = safeParse(`memo_${grade}_${classNum}_${date}`, {}); 
+        stds.forEach(s => { 
+          const st = att[s['일련번호']] || 0; 
+          if (st === 2 || st === 3 || st === 4) { 
+            const mStr = mem[s['일련번호']] ? mem[s['일련번호']].replace(/,/g, ' ') : ''; 
+            csv += `${date},${nowTime},${grade}학년 ${classNum}반 ${s['일련번호']},${s['이름']},${statusMap[st]},${mStr}\n`; 
+          } 
+        }); 
+      } 
+    } 
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); 
+    const link = document.createElement("a"); link.href = URL.createObjectURL(blob); 
+    link.download = `출결데이터_${new Date().toLocaleDateString('en-CA')}.csv`; link.click(); 
+  }
+  
+  document.getElementById('btn-export-excel').addEventListener('click', () => exportExcel('all')); 
+  document.getElementById('btn-export-class-excel').addEventListener('click', () => exportExcel('class')); 
+  document.getElementById('btn-export-period-excel').addEventListener('click', () => exportExcel('period'));
+  document.getElementById('btn-clear-all').addEventListener('click', async () => { 
+    if (await showConfirm("정말로 기기의 모든 출결 데이터를 지우시겠습니까?", '초기화')) { 
+      localStorage.clear(); showToast("초기화 완료"); location.reload(); 
+    } 
+  });
+  
+  navLeft.addEventListener('click', () => initHome()); 
+  navRight.addEventListener('click', () => switchView('setup')); 
+  document.getElementById('btn-game-toggle').addEventListener('click', () => switchView('game')); 
+  document.getElementById('btn-close-game-select').addEventListener('click', () => initHome());
+  document.getElementById('btn-quit-game').addEventListener('click', () => { stopMiniGame(); openGameLobby(); });
+
+  function openGameHub() {
+    stopMiniGame();
+    document.getElementById('game-select').style.display = 'block';
+    document.getElementById('game-lobby').style.display = 'none';
+    document.getElementById('game-play-area').style.display = 'none';
+  }
+
+  document.getElementById('tile-penguin').addEventListener('click', () => {
+    document.getElementById('game-select').style.display = 'none';
+    openGameLobby();
+  });
+
+  document.getElementById('tile-card').addEventListener('click', () => {
+    window.location.href = 'card-game.html';
+  });
+
+  document.getElementById('tile-gameboy').addEventListener('click', () => {
+    window.location.href = 'gameboy-emulator.html';
+  });
+
+  document.getElementById('btn-back-to-select').addEventListener('click', () => {
+    stopMiniGame();
+    openGameHub();
+  });
+
+  function showContactPopup(student, status) { 
+    state.currentStudentId = student['일련번호']; document.getElementById('sheet-name').textContent = `${student['이름']} 학생`; 
+    const sNum = student['전화번호'] ? student['전화번호'].replace(/[^0-9]/g,'') : ''; 
+    const sBtn = document.getElementById('contact-student'); 
+    if(sNum) { sBtn.href = `tel:${sNum}`; sBtn.style.opacity = 1; document.getElementById('contact-student-num').textContent = sNum; } 
+    else { sBtn.href = '#'; sBtn.style.opacity = 0.5; document.getElementById('contact-student-num').textContent = '없음'; } 
+    const pNum = student['추가전화번호'] ? student['추가전화번호'].replace(/[^0-9]/g,'') : ''; 
+    const pBtn = document.getElementById('contact-parent'); 
+    if(pNum) { pBtn.href = `tel:${pNum}`; pBtn.style.opacity = 1; document.getElementById('contact-parent-num').textContent = pNum; } 
+    else { pBtn.href = '#'; pBtn.style.opacity = 0.5; document.getElementById('contact-parent-num').textContent = '없음'; } 
+    const smsBtn = document.getElementById('sms-parent'); 
+    if(pNum) { 
+      let tpl = localStorage.getItem('sms_template') || '안녕하세요. 오늘 {이름} 학생이 {사유}하여 연락드렸습니다.'; 
+      tpl = tpl.replace('{이름}', student['이름']).replace('{사유}', statusMap[status]||'결석'); 
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent); 
+      smsBtn.href = `sms:${pNum}${isIOS ? '&' : '?'}body=${encodeURIComponent(tpl)}`; smsBtn.style.opacity = 1; 
+    } else { smsBtn.href = '#'; smsBtn.style.opacity = 0.5; } 
+    document.getElementById('student-memo-input').value = state.memos[student['일련번호']] || ''; 
+    document.getElementById('overlay').classList.add('show'); document.getElementById('contact-sheet').classList.add('show'); 
+  }
+  
+  document.getElementById('btn-save-memo').addEventListener('click', () => { 
+    if(state.currentStudentId) { 
+      const val = document.getElementById('student-memo-input').value; 
+      if (val) state.memos[state.currentStudentId] = val; else delete state.memos[state.currentStudentId]; 
+      renderAttendanceGrid(); closeAllPopups(); 
+    } 
+  });
+  
+  function closeAllPopups() { 
+    document.getElementById('overlay').classList.remove('show'); 
+    document.getElementById('contact-sheet').classList.remove('show'); 
+    document.getElementById('seat-sheet').classList.remove('show'); 
+    document.getElementById('add-grade-class-sheet').classList.remove('show'); 
+    document.getElementById('confirm-modal').classList.remove('show'); 
+    if (confirmResolver) { confirmResolver(false); confirmResolver = null; } 
+    state.currentStudentId = null; 
+  }
+  
+  document.getElementById('overlay').addEventListener('click', closeAllPopups); 
+
+  // 일부 브라우저/인앱 브라우저/확장 프로그램에서 네이티브 window.confirm()이
+  // 아무 반응 없이 막히는 경우가 있어(예: 이전에 "이 페이지의 추가 대화상자 차단"을 선택한 경우 등),
+  // 앱 자체 UI로 만든 확인 모달을 사용한다. deleteClass/deleteGrade 등에서 사용.
+  let confirmResolver = null; 
+  function showConfirm(message, okLabel = '삭제') { 
+    return new Promise((resolve) => { 
+      document.getElementById('confirm-modal-text').textContent = message; 
+      document.getElementById('confirm-modal-ok').textContent = okLabel; 
+      document.getElementById('overlay').classList.add('show'); 
+      document.getElementById('confirm-modal').classList.add('show'); 
+      confirmResolver = resolve; 
+    }); 
+  }
+  document.getElementById('confirm-modal-ok').addEventListener('click', () => { 
+    document.getElementById('overlay').classList.remove('show'); 
+    document.getElementById('confirm-modal').classList.remove('show'); 
+    if (confirmResolver) { confirmResolver(true); confirmResolver = null; } 
+  });
+  document.getElementById('confirm-modal-cancel').addEventListener('click', () => { 
+    document.getElementById('overlay').classList.remove('show'); 
+    document.getElementById('confirm-modal').classList.remove('show'); 
+    if (confirmResolver) { confirmResolver(false); confirmResolver = null; } 
+  });
+  document.getElementById('btn-close-contact-sheet').addEventListener('click', closeAllPopups); 
+  document.getElementById('btn-close-seat-sheet').addEventListener('click', closeAllPopups);
+
+  // ==========================================
+  // 🔊 오디오(사운드) 시스템 
+  // ==========================================
+  let audioCtx;
+  const bgm = new Audio('https://ia801407.us.archive.org/21/items/cdk-sunday/cdk-sunday.mp3'); 
+  bgm.loop = true;
+  bgm.volume = 0.3;
+
+  function initAudio() {
+    if (!audioCtx) {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new AudioContext();
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  }
+
+  function playJumpSound() {
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    
+    osc.type = 'square'; 
+    osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.1);
+    
+    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+    
+    osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+  }
+
+  function playGameOverSound() {
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(250, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.5);
+    
+    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+    
+    osc.start(); osc.stop(audioCtx.currentTime + 0.5);
+  }
+
+  // ==========================================
+  // 🏆 랭킹 & 미니게임 로직 
+  // ==========================================
+  let currentPlayerName = '';
+
+  function getLeaderboard() {
+    let lb = safeParse('penguin_leaderboard', []);
+    const now = Date.now();
+    const weekInMs = 7 * 24 * 60 * 60 * 1000;
+    lb = lb.filter(entry => (now - entry.timestamp) < weekInMs);
+    return lb.sort((a, b) => b.score - a.score).slice(0, 10);
+  }
+
+  function saveToLeaderboard(score) {
+    let lb = getLeaderboard();
+    const dateStr = new Date().toLocaleDateString('en-CA').substring(5);
+    lb.push({
+      name: currentPlayerName || '무명 선생님',
+      score: Math.floor(score),
+      date: dateStr,
+      timestamp: Date.now()
+    });
+    
+    lb = lb.sort((a, b) => b.score - a.score).slice(0, 10);
+    localStorage.setItem('penguin_leaderboard', JSON.stringify(lb));
+    saveToCloud(); 
+  }
+
+  function renderLeaderboard() {
+    const list = document.getElementById('lb-list');
+    const lb = getLeaderboard();
+    
+    if (lb.length === 0) {
+      list.innerHTML = '<div style="text-align:center; color:#999; padding: 10px;">아직 기록이 없습니다.<br>첫 기록의 주인공이 되어보세요!</div>';
+      return;
+    }
+    
+    list.innerHTML = lb.map((entry, idx) => {
+      let medal = '';
+      if(idx === 0) medal = '🥇'; else if(idx === 1) medal = '🥈'; else if(idx === 2) medal = '🥉'; else medal = `<span style="font-size:11px;color:#888;">${idx+1}.</span>`;
+      
+      return `
+        <div class="lb-row">
+          <div class="lb-rank">${medal}</div>
+          <div class="lb-name">${entry.name}</div>
+          <div class="lb-score">${entry.score}점</div>
+          <div class="lb-date">${entry.date}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  let gameAnimationId = null;
+  let gameRunning = false;
+  let hasKeydownListener = false;
+
+  let score = 0;
+  let penguin = { x: 40, y: 140, w: 24, h: 30, vy: 0, jumping: false, frame: 0 };
+  let obstacles = [];
+  let environment = { clouds: [], icebergs: [], groundX: 0 };
+  let spawnTimer = 0;
+  let jumpPressed = false; // 점프 버튼 유지 상태
+
+  function openGameLobby() {
+    document.getElementById('game-lobby').style.display = 'flex';
+    document.getElementById('game-play-area').style.display = 'none';
+    
+    const savedName = localStorage.getItem('penguin_player_name');
+    if(savedName) document.getElementById('player-name-input').value = savedName;
+    
+    // 모바일 터치 영역 확장을 위한 스타일링 (캔버스 리사이즈)
+    canvas.style.width = '100%';
+    canvas.style.maxWidth = '600px';
+    canvas.style.height = 'auto';
+    canvas.style.minHeight = '30vh'; 
+    canvas.style.objectFit = 'contain';
+    document.getElementById('game-play-area').style.touchAction = 'none'; // 스크롤 방지
+    
+    let adminBtn = document.getElementById('btn-admin-reset');
+    if (!adminBtn) {
+      adminBtn = document.createElement('button');
+      adminBtn.id = 'btn-admin-reset';
+      adminBtn.innerHTML = '👑 관리자 (랭킹 초기화)';
+      adminBtn.style.cssText = 'margin-top: 15px; background: #FF3B30; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; width: 100%; max-width: 300px; display: block; margin-left: auto; margin-right: auto;';
+      
+      adminBtn.addEventListener('click', () => {
+        const pwd = prompt('관리자 비밀번호를 입력하세요 (4자리):');
+        if (pwd === '1234') {
+          localStorage.removeItem('penguin_leaderboard');
+          saveToCloud();
+          renderLeaderboard();
+          alert('🏆 랭킹이 성공적으로 초기화되었습니다!');
+        } else if (pwd !== null) {
+          alert('❌ 비밀번호가 일치하지 않습니다.');
+        }
+      });
+      
+      const lobbyContainer = document.querySelector('#game-lobby .lobby-content') || document.getElementById('game-lobby');
+      lobbyContainer.appendChild(adminBtn);
+    }
+    renderLeaderboard();
+  }
+
+  document.getElementById('btn-start-game').addEventListener('click', () => {
+    const nameInput = document.getElementById('player-name-input').value.trim();
+    if (!nameInput) {
+      alert("선생님의 닉네임을 입력해 주세요!");
+      document.getElementById('player-name-input').focus();
+      return;
+    }
+    currentPlayerName = nameInput;
+    localStorage.setItem('penguin_player_name', currentPlayerName);
+    
+    document.getElementById('game-lobby').style.display = 'none';
+    document.getElementById('game-play-area').style.display = 'flex';
+    
+    initAudio();
+    bgm.currentTime = 0;
+    bgm.play().catch(e => console.log("BGM 재생 실패", e));
+    
+    startMiniGame();
+  });
+
+  function initGameObjects() {
+    score = 0;
+    penguin.y = 140; penguin.vy = 0; penguin.jumping = false; penguin.frame = 0;
+    obstacles = [];
+    environment.clouds = [{x: 100, y: 30, w: 40}, {x: 280, y: 50, w: 50}];
+    environment.icebergs = [{x: 60, w: 40, h: 30}, {x: 230, w: 60, h: 45}];
+    environment.groundX = 0;
+    spawnTimer = 0;
+    jumpPressed = false;
+  }
+
+  function startMiniGame() {
+    if (gameRunning) return;
+    if (!hasKeydownListener) {
+      window.addEventListener('keydown', handleKeyDown);
+      window.addEventListener('keyup', handleKeyUp);
+      hasKeydownListener = true;
+    }
+    gameRunning = true;
+    initGameObjects();
+    gameLoop();
+  }
+
+  function stopMiniGame() {
+    gameRunning = false;
+    bgm.pause(); 
+    if (gameAnimationId) {
+      cancelAnimationFrame(gameAnimationId);
+      gameAnimationId = null;
+    }
+  }
+
+  // ==== 롱 점프/숏 점프 컨트롤 ====
+  function handleJumpStart(e) {
+    if (e && e.cancelable) e.preventDefault(); 
+    if (!gameRunning) return;
+    jumpPressed = true;
+    if (!penguin.jumping) {
+      penguin.vy = -6.2; // 초기 점프력 
+      penguin.jumping = true;
+      playJumpSound(); 
+    }
+  }
+  
+  function handleJumpEnd(e) {
+    jumpPressed = false;
+  }
+
+  function handleKeyDown(e) {
+    if (e.code === 'Space' && views.game.classList.contains('active') && document.getElementById('game-play-area').style.display === 'flex') {
+      e.preventDefault(); handleJumpStart();
+    }
+  }
+  
+  function handleKeyUp(e) {
+    if (e.code === 'Space') handleJumpEnd();
+  }
+
+  // 화면 전체(게임 영역)를 터치/클릭해도 작동하도록 넓게 이벤트 부착
+  const gamePlayArea = document.getElementById('game-play-area');
+  gamePlayArea.addEventListener('touchstart', handleJumpStart, { passive: false });
+  gamePlayArea.addEventListener('touchend', handleJumpEnd);
+  gamePlayArea.addEventListener('mousedown', handleJumpStart);
+  gamePlayArea.addEventListener('mouseup', handleJumpEnd);
+  gamePlayArea.addEventListener('mouseleave', handleJumpEnd);
+
+  // ==== 장애물 그리기 로직 (테두리 추가로 시인성 향상) ====
+  function drawPenguin(x, y, frame, isDead, isNight) {
+    ctx.fillStyle = isNight ? '#E5E5EA' : '#1C1C1E'; 
+    ctx.fillRect(x + 4, y, 16, 26);
+    ctx.fillStyle = isNight ? '#1C1C1E' : '#FFFFFF'; 
+    ctx.fillRect(x + 8, y + 8, 10, 16);
+    ctx.fillStyle = '#FF9500'; ctx.fillRect(x + 18, y + 6, 4, 3);
+    
+    if (isDead) {
+      ctx.strokeStyle = '#FF3B30'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x+12, y+4); ctx.lineTo(x+16, y+8); ctx.moveTo(x+16, y+4); ctx.lineTo(x+12, y+8); ctx.stroke();
+    } else {
+      ctx.fillStyle = isNight ? '#FFFFFF' : '#000000'; ctx.fillRect(x + 14, y + 4, 2, 3);
+    }
+    if (!penguin.jumping && !isDead) { 
+      ctx.fillStyle = '#FF9500'; if (frame % 20 < 10) { ctx.fillRect(x + 5, y + 26, 4, 3); } else { ctx.fillRect(x + 14, y + 26, 4, 3); }
+    } else {
+      ctx.fillStyle = '#FF9500'; ctx.fillRect(x + 5, y + 26, 4, 3); ctx.fillRect(x + 14, y + 26, 4, 3);
+    }
+  }
+
+  function drawSeal(x, y, w, h, isNight) { 
+    ctx.fillStyle = isNight ? '#D1D1D6' : '#8E8E93'; 
+    ctx.strokeStyle = '#1C1C1E'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.rect(x, y + h - 14, w, 14); ctx.fill(); ctx.stroke();
+    ctx.fillRect(x + w - 6, y + h - 20, 8, 10); 
+    ctx.fillStyle = isNight ? '#FFFFFF' : '#3A3A3C'; 
+    ctx.fillRect(x + w - 3, y + h - 18, 2, 2); 
+    ctx.fillStyle = isNight ? '#AEAEB2' : '#555555'; 
+    ctx.fillRect(x + 2, y + h - 4, 6, 4); 
+  }
+
+  function drawSeagull(x, y, frame, isNight) {
+    ctx.strokeStyle = isNight ? '#F2F2F7' : '#3A3A3C'; 
+    ctx.lineWidth = 2.5; ctx.beginPath();
+    if (frame % 30 < 15) { ctx.moveTo(x, y); ctx.lineTo(x + 10, y + 6); ctx.lineTo(x + 20, y); } else { ctx.moveTo(x, y + 6); ctx.lineTo(x + 10, y); ctx.lineTo(x + 20, y + 6); }
+    ctx.stroke(); ctx.fillStyle = '#FFCC00'; ctx.fillRect(x + 8, y + 2, 3, 2);
+  }
+
+  function drawPolarBear(x, y, w, h, isNight) {
+    ctx.fillStyle = isNight ? '#D1D1D6' : '#FFFFFF'; 
+    ctx.strokeStyle = '#1C1C1E'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.rect(x, y+10, w, h-10); ctx.fill(); ctx.stroke();
+    ctx.fillRect(x+w-12, y, 12, 12); 
+    ctx.fillStyle = isNight ? '#FF3B30' : '#1C1C1E'; 
+    ctx.fillRect(x+w-4, y+3, 2, 2); 
+  }
+
+  function drawIceSpike(x, y, w, h, isNight, count = 1) {
+    ctx.fillStyle = isNight ? '#00FFFF' : '#00BFFF'; 
+    ctx.strokeStyle = isNight ? '#008888' : '#0055AA';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    let spikeW = w / count;
+    for(let i=0; i<count; i++) {
+        let sx = x + (spikeW * i);
+        ctx.moveTo(sx, y+h);
+        ctx.lineTo(sx + spikeW/2, y);
+        ctx.lineTo(sx + spikeW, y+h);
+    }
+    ctx.fill(); ctx.stroke();
+  }
+
+  function gameLoop() {
+    if (!gameRunning) return;
+
+    // 1. 낮/밤 사이클 로직 (일정 점수마다 계속 순환)
+    let cycle = Math.floor(score / 800); 
+    let isNight = cycle % 2 === 1;
+    
+    let skyColor = '#E0F7FA'; // 낮
+    if (isNight) skyColor = '#1A3A4B'; // 밤
+    else if (score % 800 > 600) skyColor = '#4A7C96'; // 밤이 오기 전 노을
+    
+    ctx.fillStyle = skyColor; ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = isNight ? '#2A5A6B' : '#B2EBF2'; 
+    environment.clouds.forEach(c => { c.x -= 0.3; if(c.x + c.w < 0) c.x = canvas.width + 20; ctx.fillRect(c.x, c.y, c.w, 12); ctx.fillRect(c.x + 5, c.y - 4, c.w - 10, 16); });
+
+    ctx.fillStyle = isNight ? '#164356' : '#80DEEA'; 
+    environment.icebergs.forEach(b => { b.x -= 0.7; if(b.x + b.w < 0) b.x = canvas.width + Math.random()*50; ctx.beginPath(); ctx.moveTo(b.x, 166); ctx.lineTo(b.x + b.w/2, 166 - b.h); ctx.lineTo(b.x + b.w, 166); ctx.fill(); });
+
+    ctx.fillStyle = isNight ? '#2B4A54' : '#E0F2F1'; ctx.fillRect(0, 166, canvas.width, 34);
+    ctx.fillStyle = isNight ? '#395E69' : '#B2DFDB'; ctx.fillRect(0, 166, canvas.width, 3);
+
+    penguin.frame++;
+    
+    // 점프 중 중력 조절 (누르고 있으면 중력 약함 = 롱 점프)
+    if (penguin.jumping) { 
+      let gravity = (jumpPressed && penguin.vy < 0) ? 0.25 : 0.6; 
+      penguin.vy += gravity; 
+      penguin.y += penguin.vy; 
+      if (penguin.y >= 140) { penguin.y = 140; penguin.jumping = false; penguin.vy = 0; } 
+    }
+
+    spawnTimer++;
+    let spawnRate = Math.max(50, 90 - Math.floor(score / 80));
+    
+    if (spawnTimer > spawnRate) {
+      let rand = Math.random();
+      if (rand > 0.7) {
+        obstacles.push({ type: 'seal', x: canvas.width, y: 140, w: Math.random() > 0.5 ? 26 : 38, h: 20 }); 
+      } else if (rand > 0.45) {
+        // 갈매기는 하늘 또는 지상 양쪽에서 랜덤하게 등장
+        let isGround = Math.random() > 0.5;
+        let gy = isGround ? 135 : (85 + Math.random()*25);
+        obstacles.push({ type: 'seagull', x: canvas.width, y: gy, w: 20, h: 10 }); 
+      } else if (rand > 0.25) {
+        obstacles.push({ type: 'polarbear', x: canvas.width, y: 130, w: 45, h: 30 }); 
+      } else {
+        // 얼음 송곳은 1~3개가 나란히 붙어서 등장
+        let spikeCount = Math.floor(Math.random() * 3) + 1;
+        obstacles.push({ type: 'icespike', x: canvas.width, y: 145, w: 15 * spikeCount, h: 15, count: spikeCount }); 
+      }
+      spawnTimer = 0;
+    }
+
+    let gameOver = false;
+    let speed = 3.2 + (score / 700);
+
+    for (let i = obstacles.length - 1; i >= 0; i--) {
+      let obs = obstacles[i];
+      obs.x -= speed;
+
+      if (obs.type === 'seal') drawSeal(obs.x, obs.y, obs.w, obs.h, isNight); 
+      else if (obs.type === 'seagull') drawSeagull(obs.x, obs.y, penguin.frame, isNight);
+      else if (obs.type === 'polarbear') drawPolarBear(obs.x, obs.y, obs.w, obs.h, isNight);
+      else if (obs.type === 'icespike') drawIceSpike(obs.x, obs.y, obs.w, obs.h, isNight, obs.count);
+
+      // 충돌 판정 (살짝 여유를 줌)
+      if (obs.x < penguin.x + penguin.w - 4 && obs.x + obs.w > penguin.x + 4 &&
+          obs.y < penguin.y + penguin.h - 3 && obs.y + obs.h > penguin.y + 3) {
+        gameOver = true;
+      }
+
+      if (obs.x + obs.w < 0) { obstacles.splice(i, 1); score += 50; } 
+    }
+
+    score += 0.5;
+    ctx.fillStyle = isNight ? '#E0F7FA' : '#005F73'; 
+    ctx.font = 'bold 13px sans-serif'; 
+    ctx.fillText(`SCORE: ${Math.floor(score)}`, 15, 25);
+
+    if (gameOver) {
+      bgm.pause();           
+      playGameOverSound();   
+      
+      drawPenguin(penguin.x, penguin.y, penguin.frame, true, isNight);
+      ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.fillStyle = '#FFFFFF'; ctx.font = 'bold 20px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('🎮 GAME OVER', canvas.width/2, 90);
+      ctx.font = '13px sans-serif'; ctx.fillText(`최종 스코어: ${Math.floor(score)}점`, canvas.width/2, 115);
+      
+      saveToLeaderboard(score);
+      ctx.fillStyle = '#FFCC00'; ctx.fillText('화면 터치 시 로비로 돌아갑니다', canvas.width/2, 145);
+      ctx.textAlign = 'left';
+      
+      stopMiniGame();
+      
+      const goToLobby = () => {
+        gamePlayArea.removeEventListener('touchstart', goToLobby);
+        gamePlayArea.removeEventListener('mousedown', goToLobby);
+        openGameLobby();
+      };
+      setTimeout(() => {
+        gamePlayArea.addEventListener('touchstart', goToLobby);
+        gamePlayArea.addEventListener('mousedown', goToLobby);
+      }, 700);
+      return;
+    }
+
+    drawPenguin(penguin.x, penguin.y, penguin.frame, false, isNight);
+    gameAnimationId = requestAnimationFrame(gameLoop);
+  }
+
+  // 앱 초기화 로직
+  async function initApp() { await loadFromCloud(); initHome(); }
+  initApp();
+</script>
