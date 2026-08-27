@@ -74,31 +74,29 @@ document.getElementById('searchInput').addEventListener('input', (e) => renderLi
 document.getElementById('coreFilter').addEventListener('change', (e) => renderLibrary(e.target.value, document.getElementById('searchInput').value));
 window.addEventListener('load', () => renderLibrary());
 
+// 전역 변수로 선택한 파일 임시 저장
+window.pendingFile = null;
+
 // 4. 화면 3 (파일 업로드 이벤트 처리)
 document.getElementById('romFile').addEventListener('change', function(e) {
   const file = e.target.files[0];
   if (!file) return;
   
   const fileName = file.name.toLowerCase();
-  // zip 외에 snes, gba 확장자도 허용하도록 수정
   if (!fileName.endsWith('.zip') && !fileName.endsWith('.smc') && !fileName.endsWith('.sfc')) {
     alert("지원하는 롬 파일 확장자가 아닙니다 (.zip, .smc, .sfc)");
     return;
   }
   
-  // 에뮬레이터 실행 (emulator.js로 전달)
-  loadEmulator(file, window.appState.selectedCore);
+  // 파일을 임시 저장하고, 업로드 창을 숨긴 뒤 선택 모달 띄우기
+  window.pendingFile = file;
+  document.getElementById('upload-ui').style.display = 'none';
+  document.getElementById('device-modal').style.display = 'block';
 });
 
-// 드래그 앤 드롭 업로드 처리
-const uploadBox = document.getElementById('upload-ui');
-uploadBox.addEventListener('dragover', (e) => { e.preventDefault(); uploadBox.style.borderColor = 'var(--accent-color)'; });
-uploadBox.addEventListener('dragleave', () => { uploadBox.style.borderColor = 'var(--glass-border)'; });
-uploadBox.addEventListener('drop', (e) => {
-  e.preventDefault();
-  uploadBox.style.borderColor = 'var(--glass-border)';
-  if (e.dataTransfer.files.length) {
-    document.getElementById('romFile').files = e.dataTransfer.files;
-    document.getElementById('romFile').dispatchEvent(new Event('change'));
-  }
-});
+// 디바이스 선택 완료 시 게임 실행 함수
+window.startGameWithDevice = function(deviceType) {
+  document.getElementById('device-modal').style.display = 'none';
+  // emulator.js의 loadEmulator 함수 호출 (deviceType 전달)
+  loadEmulator(window.pendingFile, window.appState.selectedCore, deviceType);
+};
