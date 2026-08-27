@@ -79,8 +79,10 @@ document.getElementById('romFile').addEventListener('change', function(e) {
   const file = e.target.files[0];
   if (!file) return;
   
-  if (!file.name.toLowerCase().endsWith('.zip')) {
-    alert("ZIP 형식의 파일만 지원합니다.");
+  const fileName = file.name.toLowerCase();
+  // zip 외에 snes, gba 확장자도 허용하도록 수정
+  if (!fileName.endsWith('.zip') && !fileName.endsWith('.smc') && !fileName.endsWith('.sfc')) {
+    alert("지원하는 롬 파일 확장자가 아닙니다 (.zip, .smc, .sfc)");
     return;
   }
   
