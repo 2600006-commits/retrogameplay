@@ -1,6 +1,7 @@
 // 전역 상태 (빌드 도구 없이 공유하기 위함)
+// 페이지가 새로고침되어도(예: 롬 교체 시) 선택된 코어를 잃지 않도록 sessionStorage에서 복원
 window.appState = {
-  selectedCore: null
+  selectedCore: sessionStorage.getItem('selectedCore') || null
 };
 
 // 1. 해시(Hash) 기반 라우팅
@@ -40,6 +41,7 @@ handleRouting(); // 이벤트 기다리지 않고 스크립트 로드 즉시 화
 // 2. 화면 1 (에뮬레이터 선택) 로직
 function selectCore(core) {
   window.appState.selectedCore = core;
+  sessionStorage.setItem('selectedCore', core);
   window.location.hash = '#play';
 }
 
