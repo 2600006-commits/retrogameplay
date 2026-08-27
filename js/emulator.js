@@ -4,12 +4,12 @@ function loadEmulator(file, core) {
   document.getElementById('emulator-ui').style.display = 'block';
 
   // 2. EmulatorJS 설정 객체 생성
-  // const romUrl = URL.createObjectURL(file); <- 이 줄을 삭제하세요.
+  const romUrl = URL.createObjectURL(file); // 이 줄을 다시 추가합니다.
   const device = detectDeviceType();
 
   window.EJS_player = '#game-container';
   window.EJS_core = core;
-  window.EJS_gameUrl = file; // URL 변환 없이 File 객체 원본을 그대로 전달!
+  window.EJS_gameUrl = romUrl; // 다시 romUrl로 변경합니다.
   window.EJS_pathtodata = 'https://cdn.jsdelivr.net/npm/emulatorjs@latest/data/'; // 필수 코어 데이터 경로
   window.EJS_color = 'var(--accent-color)';
   
