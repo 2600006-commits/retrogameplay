@@ -1,0 +1,6 @@
+.core-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; padding: 20px; }
+.core-card { padding: 40px 30px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 15px; transition: transform 0.3s; }
+.core-card:hover { transform: translateY(-5px); border-color: var(--accent-color); }
+.core-icon { font-size: 4rem; }
+.core-card p { color: var(--text-muted); font-size: 0.95rem; }
+.core-card button { margin-top: auto; width: 100%; }

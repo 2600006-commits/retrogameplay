@@ -1,0 +1,9 @@
+.library-container { padding: 30px; }
+.library-controls { display: flex; gap: 15px; margin-bottom: 20px; }
+.glass-input { background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: #fff; padding: 10px 15px; border-radius: 8px; outline: none; }
+#searchInput { flex: 1; }
+.table-responsive { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; text-align: left; }
+th, td { padding: 15px; border-bottom: 1px solid var(--glass-border); }
+th { color: var(--text-muted); font-weight: 500; }
+tr:hover { background: rgba(255,255,255,0.02); }
