@@ -92,7 +92,7 @@
       </div>
     </section>
 
-    <!-- 화면 3: 플레이 화면 (파일 업로드 및 에뮬레이터) -->
+  <!-- 화면 3: 플레이 화면 (파일 업로드 및 에뮬레이터) -->
     <section id="screen-play" class="screen">
       <div class="header-text">
         <h1 id="play-title">게임 준비 중</h1>
@@ -102,16 +102,26 @@
       <div id="upload-ui" class="glass-panel upload-box">
         <div class="upload-icon">📁</div>
         <h3>롬 파일을 선택해주세요</h3>
-        <p>지원 형식: <span class="badge">.zip</span></p>
+        <p>지원 형식: <span class="badge">.zip</span> <span class="badge">.smc</span> <span class="badge">.sfc</span></p>
         <p class="warning-text">서버로 전송되지 않으며, 브라우저 메모리에서만 처리됩니다.</p>
-        <input type="file" id="romFile" accept=".zip" class="hidden-input">
+        <input type="file" id="romFile" accept=".zip,.smc,.sfc" class="hidden-input">
         <button class="btn-metal btn-large" onclick="document.getElementById('romFile').click()">파일 찾기</button>
+      </div>
+
+      <!-- 모바일/PC 선택 모달 (초기엔 숨김) -->
+      <div id="device-modal" class="glass-panel" style="display: none; padding: 40px; text-align: center; margin-top: 20px;">
+        <h2>플레이 환경을 선택하세요</h2>
+        <p style="margin-bottom: 30px; color: var(--text-muted);">환경에 맞게 컨트롤러가 세팅됩니다.</p>
+        <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+          <button class="btn-metal btn-large" onclick="startGameWithDevice('desktop')">💻 PC (키보드)</button>
+          <button class="btn-metal btn-large" onclick="startGameWithDevice('mobile')">📱 모바일 (터치패드)</button>
+        </div>
       </div>
 
       <!-- 에뮬레이터 UI (초기엔 숨김) -->
       <div id="emulator-ui" style="display: none;">
         <div class="game-toolbar glass-panel">
-          <button class="btn-metal" onclick="location.hash='#select'">다시 선택</button>
+          <button class="btn-metal" onclick="location.reload()">다시 선택</button>
           <label class="toggle-switch">
             <input type="checkbox" id="crtToggle" checked>
             <span class="slider"></span> CRT 효과
@@ -122,6 +132,14 @@
         <div class="crt-bezel">
           <div id="game-container"></div>
           <div id="crt-overlay" class="crt-effects"></div>
+        </div>
+
+        <!-- PC용 키보드 안내 가이드 (데스크톱 선택 시에만 표시) -->
+        <div id="pc-key-guide" class="glass-panel" style="display: none; margin-top: 20px; padding: 20px; text-align: center;">
+          <h3 style="margin-bottom: 15px;">⌨️ 기본 키보드 조작법</h3>
+          <p><strong>방향키:</strong> 이동 &nbsp;|&nbsp; <strong>Z, X, C, A, S, D:</strong> 액션 버튼</p>
+          <p><strong>Enter:</strong> Start (게임 시작) &nbsp;|&nbsp; <strong>Shift:</strong> Select / Coin (코인 투입)</p>
+          <p style="color: #ff6b6b; font-size: 0.85rem; margin-top: 10px;">※ 조작이 안 되거나 멈추면 게임 화면(검은 영역)을 마우스로 한 번 클릭해 주세요.</p>
         </div>
       </div>
     </section>
