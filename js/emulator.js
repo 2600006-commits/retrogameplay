@@ -5,7 +5,7 @@ function loadEmulator(file, core, deviceType) {
   // 2. EmulatorJS 설정
   window.EJS_player = '#game-container';
   window.EJS_core = core;
-  window.EJS_gameUrl = file; 
+  window.EJS_gameUrl = URL.createObjectURL(file);
   window.EJS_pathtodata = 'https://cdn.jsdelivr.net/npm/emulatorjs@latest/data/';
   window.EJS_color = 'var(--accent-color)';
   
