@@ -2,9 +2,21 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Retro Web Arcade</title>
-  
+
+  <!-- 저장된 테마를 CSS/컴포넌트가 그리기 전에 미리 적용 (테마 전환 시 깜빡임 방지) -->
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('rwa-theme');
+        document.documentElement.setAttribute('data-theme', saved || 'blue');
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'blue');
+      }
+    })();
+  </script>
+
   <!-- CSS 로드 -->
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/select.css">
@@ -19,6 +31,16 @@
       <a href="#select" class="nav-link">에뮬레이터 선택</a>
       <a href="#library" class="nav-link">게임 라이브러리</a>
     </nav>
+    <!-- 테마 선택 위젯: 7가지 색상 테마를 즉시 전환 -->
+    <div class="theme-picker" id="themePicker" role="group" aria-label="테마 선택">
+      <button class="theme-dot" data-theme="red"    style="--dot-color:#ff453a" title="레드" aria-label="레드 테마"></button>
+      <button class="theme-dot" data-theme="blue"   style="--dot-color:#0a84ff" title="블루" aria-label="블루 테마"></button>
+      <button class="theme-dot" data-theme="green"  style="--dot-color:#30d158" title="그린" aria-label="그린 테마"></button>
+      <button class="theme-dot" data-theme="yellow" style="--dot-color:#ffd60a" title="옐로우" aria-label="옐로우 테마"></button>
+      <button class="theme-dot" data-theme="purple" style="--dot-color:#bf5af2" title="퍼플" aria-label="퍼플 테마"></button>
+      <button class="theme-dot" data-theme="black"  style="--dot-color:#1c1c1e" title="블랙" aria-label="블랙 테마"></button>
+      <button class="theme-dot" data-theme="white"  style="--dot-color:#ffffff" title="화이트" aria-label="화이트 테마"></button>
+    </div>
   </header>
 
   <!-- 메인 콘텐츠 영역 (SPA) -->
@@ -39,13 +61,13 @@
           <button class="btn-metal">선택하기</button>
         </div>
         <!-- 슈퍼패미컴 (테스트용) 카드 -->
-<div class="core-card glass-panel" onclick="selectCore('snes')">
-  <div class="core-icon">🍄</div>
-  <h2>Super Famicom</h2>
-  <p>1단계 구동 테스트용 코어</p>
-  <span class="badge">.smc, .sfc 지원</span>
-  <button class="btn-metal">선택하기</button>
-</div>
+        <div class="core-card glass-panel" onclick="selectCore('snes')">
+          <div class="core-icon">🍄</div>
+          <h2>Super Famicom</h2>
+          <p>1단계 구동 테스트용 코어</p>
+          <span class="badge">.smc, .sfc 지원</span>
+          <button class="btn-metal">선택하기</button>
+        </div>
         <!-- FBNeo 카드 -->
         <div class="core-card glass-panel" onclick="selectCore('fbneo')">
           <div class="core-icon">🥊</div>
@@ -97,7 +119,7 @@
       <div class="header-text">
         <h1 id="play-title">게임 준비 중</h1>
       </div>
-      
+
       <!-- 업로드 UI -->
       <div id="upload-ui" class="glass-panel upload-box">
         <div class="upload-icon">📁</div>
@@ -127,9 +149,9 @@
             <span class="slider"></span> CRT 효과
           </label>
         </div>
-        
+
         <!-- CRT 베젤 및 게임 화면 -->
-        <div class="crt-bezel">
+        <div class="crt-bezel" id="crtBezel">
           <div id="game-container"></div>
           <div id="crt-overlay" class="crt-effects"></div>
         </div>
