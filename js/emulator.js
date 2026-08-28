@@ -5,7 +5,8 @@ function loadEmulator(file, core, deviceType) {
   // 2. EmulatorJS 설정
   window.EJS_player = '#game-container';
   window.EJS_core = core;
-  window.EJS_gameUrl = URL.createObjectURL(file);
+  window.EJS_gameUrl = URL.createObjectURL(file); 
+  window.EJS_gameName = file.name; // ★ 추가된 핵심 코드: 브라우저가 숨긴 원본 파일명을 엔진에 강제로 알려줌
   window.EJS_pathtodata = 'https://cdn.jsdelivr.net/npm/emulatorjs@latest/data/';
   window.EJS_color = 'var(--accent-color)';
   
@@ -14,6 +15,7 @@ function loadEmulator(file, core, deviceType) {
     window.EJS_VirtualGamepadSettings = { active: true }; // 모바일 가상 조이스틱 켬
     document.getElementById('pc-key-guide').style.display = 'none';
   } else {
+// ... (이하 기존 코드와 동일)
     window.EJS_VirtualGamepadSettings = { active: false }; // 데스크톱 조이스틱 끔
     document.getElementById('pc-key-guide').style.display = 'block';
   }
