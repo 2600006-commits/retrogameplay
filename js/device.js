@@ -16,4 +16,10 @@ function checkOrientation() {
     }
   }
 }
+
+// (버그 수정) 기존에는 'resize' 이벤트에만 연결되어 있어서
+// 페이지를 처음 열었을 때(세로 모드로 접속한 경우) 방향 체크가 전혀 실행되지 않았습니다.
+// 최초 로드 시점과 실제 기기 회전(orientationchange)에도 체크하도록 보강했습니다.
 window.addEventListener('resize', checkOrientation);
+window.addEventListener('orientationchange', checkOrientation);
+document.addEventListener('DOMContentLoaded', checkOrientation);

@@ -7,15 +7,15 @@ window.appState = {
 // 1. 해시(Hash) 기반 라우팅
 function handleRouting() {
   const hash = window.location.hash || '#select';
-  
+
   // 모든 화면 숨김
   document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
-  
+
   // 타겟 화면 표시
   const targetScreen = document.querySelector(`#screen-${hash.replace('#', '')}`);
   if (targetScreen) targetScreen.classList.add('active');
-  
+
   // 네비게이션 활성화 상태 변경
   const activeLink = document.querySelector(`.nav-link[href="${hash}"]`);
   if (activeLink) activeLink.classList.add('active');
@@ -27,7 +27,10 @@ function handleRouting() {
       window.location.hash = '#select';
       return;
     }
-    const coreName = window.appState.selectedCore === 'fbneo' ? 'NEOGEO/CPS' : 'MAME';
+    // (버그 수정) 기존엔 fbneo 외에는 전부 'MAME'으로 표시되어
+    // 'snes' 코어를 선택해도 타이틀이 잘못 나왔습니다.
+    // games-data.js의 CORE_LABELS를 이용해 정확한 이름을 표시합니다.
+    const coreName = CORE_LABELS[window.appState.selectedCore] || window.appState.selectedCore;
     document.getElementById('play-title').innerText = `${coreName} 준비됨`;
     document.getElementById('upload-ui').style.display = 'flex';
     document.getElementById('emulator-ui').style.display = 'none';
@@ -78,16 +81,31 @@ window.addEventListener('load', () => renderLibrary());
 window.pendingFile = null;
 
 // 4. 화면 3 (파일 업로드 이벤트 처리)
-document.getElementById('romFile').addEventListener('change', function(e) {
+document.getElementById('romFile').addEventListener('change', function (e) {
   const file = e.target.files[0];
   if (!file) return;
-  
+
   const fileName = file.name.toLowerCase();
+
+  // 기본 확장자 체크
   if (!fileName.endsWith('.zip') && !fileName.endsWith('.smc') && !fileName.endsWith('.sfc')) {
     alert("지원하는 롬 파일 확장자가 아닙니다 (.zip, .smc, .sfc)");
+    e.target.value = ''; // (버그 수정) 초기화하지 않으면 같은 파일을 다시 선택해도 change 이벤트가 발생하지 않음
     return;
   }
-  
+
+  // (버그 수정) 선택한 코어와 실제 파일 확장자가 맞는지 추가 검증
+  // 예: MAME/FBNeo(.zip 전용) 코어를 선택해놓고 .smc(슈퍼패미컴) 롬을 넣으면
+  // 이전에는 그대로 통과되어 에뮬레이터가 조용히 실행 실패했습니다.
+  const selectedCore = window.appState.selectedCore;
+  const allowedExts = CORE_EXTENSIONS[selectedCore];
+  if (allowedExts && !allowedExts.some(ext => fileName.endsWith(ext))) {
+    const coreLabel = CORE_LABELS[selectedCore] || selectedCore;
+    alert(`현재 선택된 시스템(${coreLabel})은 ${allowedExts.join(', ')} 파일만 지원합니다.`);
+    e.target.value = '';
+    return;
+  }
+
   // 파일을 임시 저장하고, 업로드 창을 숨긴 뒤 선택 모달 띄우기
   window.pendingFile = file;
   document.getElementById('upload-ui').style.display = 'none';
@@ -95,7 +113,7 @@ document.getElementById('romFile').addEventListener('change', function(e) {
 });
 
 // 디바이스 선택 완료 시 게임 실행 함수
-window.startGameWithDevice = function(deviceType) {
+window.startGameWithDevice = function (deviceType) {
   document.getElementById('device-modal').style.display = 'none';
   // emulator.js의 loadEmulator 함수 호출 (deviceType 전달)
   loadEmulator(window.pendingFile, window.appState.selectedCore, deviceType);
