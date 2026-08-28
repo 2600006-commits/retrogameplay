@@ -4,6 +4,41 @@ window.appState = {
   selectedCore: sessionStorage.getItem('selectedCore') || null
 };
 
+// ─────────────────────────────────────────────
+// 0. 테마 선택 위젯 (빨강/파랑/초록/노랑/보라/검정/흰색)
+//    <html data-theme="..."> 속성만 바꾸면 style.css의 CSS 변수가
+//    전부 갱신되어 사이트 전체 색상이 즉시 바뀝니다.
+//    선택한 테마는 localStorage에 저장되어 재방문 시에도 유지됩니다.
+//    (index.html <head>의 인라인 스크립트가 페인트 이전에 먼저 적용해
+//     테마가 바뀌는 순간 깜빡이는 현상을 방지합니다.)
+// ─────────────────────────────────────────────
+const THEME_STORAGE_KEY = 'rwa-theme';
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  try { localStorage.setItem(THEME_STORAGE_KEY, theme); } catch (e) { /* 저장소 접근 불가 시 무시 */ }
+
+  document.querySelectorAll('.theme-dot').forEach(dot => {
+    dot.classList.toggle('active', dot.dataset.theme === theme);
+  });
+}
+
+function initThemePicker() {
+  const picker = document.getElementById('themePicker');
+  if (!picker) return;
+
+  const currentTheme = document.documentElement.getAttribute('data-theme') || 'blue';
+  applyTheme(currentTheme);
+
+  picker.addEventListener('click', (e) => {
+    const dot = e.target.closest('.theme-dot');
+    if (!dot) return;
+    applyTheme(dot.dataset.theme);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', initThemePicker);
+
 // 1. 해시(Hash) 기반 라우팅
 function handleRouting() {
   const hash = window.location.hash || '#select';
