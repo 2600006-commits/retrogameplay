@@ -1,211 +1,46 @@
-/* ─────────────────────────────────────────────
-   테마 시스템
-   :root(기본값) = "blue" 테마
-   [data-theme="..."] 속성으로 다른 6개 테마 오버라이드
-   theme.js가 <html data-theme="..."> 를 갱신하면 즉시 전체 사이트에 반영됨
-───────────────────────────────────────────── */
 :root {
-  --bg-color: #0b0f1a;
-  --bg-glow: #16233d;
-  --text-main: #f5f7fa;
-  --text-muted: #9aa4b2;
-  --accent-color: #0a84ff;
-  --accent-rgb: 10, 132, 255;
-  --accent-contrast: #ffffff;
-
-  /* 글래스모피즘 (iOS 스타일 반투명 유리) */
-  --glass-bg: rgba(255, 255, 255, 0.07);
-  --glass-bg-strong: rgba(255, 255, 255, 0.12);
-  --glass-border: rgba(255, 255, 255, 0.16);
-  --glass-highlight: rgba(255, 255, 255, 0.22);
-  --glass-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
-  --blur: blur(22px) saturate(180%);
-
-  --danger-color: #ff6b6b;
-  --radius-lg: 26px;
-  --radius-md: 18px;
-  --radius-sm: 12px;
-  --radius-pill: 999px;
+  --bg-color: #0b0f1a; --bg-glow: #16233d; --text-main: #f5f7fa; --text-muted: #9aa4b2;
+  --accent-color: #0a84ff; --accent-rgb: 10, 132, 255; --accent-contrast: #ffffff;
+  --glass-bg: rgba(255, 255, 255, 0.07); --glass-bg-strong: rgba(255, 255, 255, 0.12);
+  --glass-border: rgba(255, 255, 255, 0.16); --glass-highlight: rgba(255, 255, 255, 0.22);
+  --glass-shadow: 0 10px 40px rgba(0, 0, 0, 0.45); --blur: blur(22px) saturate(180%);
+  --danger-color: #ff6b6b; --radius-lg: 26px; --radius-md: 18px; --radius-sm: 12px; --radius-pill: 999px;
   --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
-[data-theme="red"] {
-  --bg-color: #150a0b;
-  --bg-glow: #3a1418;
-  --accent-color: #ff453a;
-  --accent-rgb: 255, 69, 58;
-}
-
-[data-theme="green"] {
-  --bg-color: #0a130c;
-  --bg-glow: #163a20;
-  --accent-color: #30d158;
-  --accent-rgb: 48, 209, 88;
-}
-
-[data-theme="yellow"] {
-  --bg-color: #15120a;
-  --bg-glow: #3d2f0d;
-  --accent-color: #ffd60a;
-  --accent-rgb: 255, 214, 10;
-  --accent-contrast: #221c00;
-}
-
-[data-theme="purple"] {
-  --bg-color: #120b1a;
-  --bg-glow: #341a45;
-  --accent-color: #bf5af2;
-  --accent-rgb: 191, 90, 242;
-}
-
-[data-theme="black"] {
-  --bg-color: #000000;
-  --bg-glow: #121212;
-  --accent-color: #f5f5f7;
-  --accent-rgb: 245, 245, 247;
-  --accent-contrast: #000000;
-  --glass-bg: rgba(255, 255, 255, 0.05);
-  --glass-border: rgba(255, 255, 255, 0.12);
-}
-
-[data-theme="white"] {
-  --bg-color: #eef0f4;
-  --bg-glow: #ffffff;
-  --text-main: #1c1c1e;
-  --text-muted: #6e6e73;
-  --accent-color: #007aff;
-  --accent-rgb: 0, 122, 255;
-  --accent-contrast: #ffffff;
-
-  --glass-bg: rgba(255, 255, 255, 0.55);
-  --glass-bg-strong: rgba(255, 255, 255, 0.75);
-  --glass-border: rgba(0, 0, 0, 0.07);
-  --glass-highlight: rgba(255, 255, 255, 0.9);
-  --glass-shadow: 0 10px 30px rgba(30, 30, 40, 0.12);
-}
+[data-theme="red"] { --bg-color: #150a0b; --bg-glow: #3a1418; --accent-color: #ff453a; --accent-rgb: 255, 69, 58; }
+[data-theme="green"] { --bg-color: #0a130c; --bg-glow: #163a20; --accent-color: #30d158; --accent-rgb: 48, 209, 88; }
+[data-theme="yellow"] { --bg-color: #15120a; --bg-glow: #3d2f0d; --accent-color: #ffd60a; --accent-rgb: 255, 214, 10; --accent-contrast: #221c00; }
+[data-theme="purple"] { --bg-color: #120b1a; --bg-glow: #341a45; --accent-color: #bf5af2; --accent-rgb: 191, 90, 242; }
+[data-theme="black"] { --bg-color: #000000; --bg-glow: #121212; --accent-color: #f5f5f7; --accent-rgb: 245, 245, 247; --accent-contrast: #000000; --glass-bg: rgba(255, 255, 255, 0.05); --glass-border: rgba(255, 255, 255, 0.12); }
+[data-theme="white"] { --bg-color: #eef0f4; --bg-glow: #ffffff; --text-main: #1c1c1e; --text-muted: #6e6e73; --accent-color: #007aff; --accent-rgb: 0, 122, 255; --accent-contrast: #ffffff; --glass-bg: rgba(255, 255, 255, 0.55); --glass-bg-strong: rgba(255, 255, 255, 0.75); --glass-border: rgba(0, 0, 0, 0.07); --glass-highlight: rgba(255, 255, 255, 0.9); --glass-shadow: 0 10px 30px rgba(30, 30, 40, 0.12); }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Inter', "Segoe UI", Roboto, sans-serif;
-  background: var(--bg-color);
-  color: var(--text-main);
-  background-image: radial-gradient(circle at 50% 0%, var(--bg-glow) 0%, var(--bg-color) 70%);
-  background-attachment: fixed;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  transition: background-color 0.4s var(--ease), color 0.4s var(--ease);
-}
+body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', "Segoe UI", Roboto, sans-serif; background: var(--bg-color); color: var(--text-main); background-image: radial-gradient(circle at 50% 0%, var(--bg-glow) 0%, var(--bg-color) 70%); background-attachment: fixed; min-height: 100vh; display: flex; flex-direction: column; transition: background-color 0.4s var(--ease), color 0.4s var(--ease); }
 
-/* ─────────────────────────────────────────────
-   Glass Panel (iOS 스타일 반투명 유리 패널)
-───────────────────────────────────────────── */
-.glass-panel {
-  background: var(--glass-bg);
-  backdrop-filter: var(--blur);
-  -webkit-backdrop-filter: var(--blur);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
-  border-radius: var(--radius-lg);
-  transition: background-color 0.4s var(--ease), border-color 0.4s var(--ease), box-shadow 0.4s var(--ease);
-}
+.glass-panel { background: var(--glass-bg); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight); border-radius: var(--radius-lg); transition: background-color 0.4s var(--ease), border-color 0.4s var(--ease), box-shadow 0.4s var(--ease); }
 
-/* ─────────────────────────────────────────────
-   글래스 버튼 (기존 .btn-metal 이름은 그대로 유지 —
-   main.js가 동적으로 생성하는 버튼도 이 클래스를 쓰기 때문)
-───────────────────────────────────────────── */
-.btn-metal {
-  background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.28), rgba(var(--accent-rgb), 0.14));
-  backdrop-filter: blur(10px) saturate(160%);
-  -webkit-backdrop-filter: blur(10px) saturate(160%);
-  border: 1px solid rgba(var(--accent-rgb), 0.4);
-  color: var(--text-main);
-  padding: 10px 22px;
-  border-radius: var(--radius-pill);
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 0.95rem;
-  letter-spacing: -0.01em;
-  transition: transform 0.18s var(--ease), box-shadow 0.18s var(--ease), background 0.18s var(--ease);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 2px 10px rgba(0, 0, 0, 0.15);
-}
-.btn-metal:hover {
-  transform: translateY(-2px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 8px 22px rgba(var(--accent-rgb), 0.35);
-  border-color: rgba(var(--accent-rgb), 0.7);
-}
-.btn-metal:active {
-  transform: translateY(0) scale(0.96);
-}
+.btn-metal { background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.28), rgba(var(--accent-rgb), 0.14)); backdrop-filter: blur(10px) saturate(160%); -webkit-backdrop-filter: blur(10px) saturate(160%); border: 1px solid rgba(var(--accent-rgb), 0.4); color: var(--text-main); padding: 10px 22px; border-radius: var(--radius-pill); cursor: pointer; font-weight: 600; font-size: 0.95rem; letter-spacing: -0.01em; transition: transform 0.18s var(--ease), box-shadow 0.18s var(--ease), background 0.18s var(--ease); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 2px 10px rgba(0, 0, 0, 0.15); }
+.btn-metal:hover { transform: translateY(-2px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 8px 22px rgba(var(--accent-rgb), 0.35); border-color: rgba(var(--accent-rgb), 0.7); }
+.btn-metal:active { transform: translateY(0) scale(0.96); }
 .btn-large { padding: 16px 34px; font-size: 1.05rem; }
 
-/* ─────────────────────────────────────────────
-   Layout & Typography
-───────────────────────────────────────────── */
-header {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px 16px;
-  padding: clamp(10px, 2vw, 14px) clamp(14px, 3vw, 26px);
-  margin: clamp(10px, 2vw, 18px);
-  border-radius: var(--radius-pill);
-}
+header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px 16px; padding: clamp(10px, 2vw, 14px) clamp(14px, 3vw, 26px); margin: clamp(10px, 2vw, 18px); border-radius: var(--radius-pill); }
 .logo { font-weight: 700; font-size: 1.15rem; letter-spacing: -0.02em; }
 nav { display: flex; align-items: center; gap: 4px; }
-.nav-link {
-  color: var(--text-muted);
-  text-decoration: none;
-  margin-left: 6px;
-  padding: 8px 16px;
-  border-radius: var(--radius-pill);
-  font-weight: 500;
-  transition: color 0.2s var(--ease), background 0.2s var(--ease);
-}
+.nav-link { color: var(--text-muted); text-decoration: none; margin-left: 6px; padding: 8px 16px; border-radius: var(--radius-pill); font-weight: 500; transition: color 0.2s var(--ease), background 0.2s var(--ease); }
 .nav-link:hover { color: var(--text-main); background: var(--glass-bg-strong); }
 .nav-link.active { color: var(--accent-contrast); background: var(--accent-color); }
 
-/* ─────────────────────────────────────────────
-   테마 선택 위젯
-───────────────────────────────────────────── */
-.theme-picker {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px;
-  border-radius: var(--radius-pill);
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-}
-.theme-dot {
-  --dot-color: #888;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.35);
-  background: var(--dot-color);
-  cursor: pointer;
-  padding: 0;
-  transition: transform 0.18s var(--ease), border-color 0.18s var(--ease), box-shadow 0.18s var(--ease);
-  position: relative;
-}
+.theme-picker { display: flex; align-items: center; gap: 8px; padding: 6px; border-radius: var(--radius-pill); background: var(--glass-bg); border: 1px solid var(--glass-border); }
+.theme-dot { --dot-color: #888; width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.35); background: var(--dot-color); cursor: pointer; padding: 0; transition: transform 0.18s var(--ease), border-color 0.18s var(--ease), box-shadow 0.18s var(--ease); position: relative; }
 .theme-dot[data-theme="white"] { border-color: rgba(0, 0, 0, 0.3); }
 .theme-dot[data-theme="black"] { border-color: rgba(255, 255, 255, 0.5); }
 .theme-dot:hover { transform: scale(1.15); }
-.theme-dot.active {
-  border-color: var(--dot-color);
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.12), 0 0 12px var(--dot-color);
-  transform: scale(1.15);
-}
-.theme-dot.active::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  border: 2px solid rgba(0, 0, 0, 0.35);
-}
+.theme-dot.active { border-color: var(--dot-color); box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.12), 0 0 12px var(--dot-color); transform: scale(1.15); display: flex; align-items: center; justify-content: center; }
+.theme-dot.active::after { content: "✓"; color: white; font-size: 12px; font-weight: bold; text-shadow: 0 1px 2px rgba(0,0,0,0.5); position: absolute; }
+.theme-dot[data-theme="white"].active::after { color: black; text-shadow: none; }
 
 main { flex: 1; padding: clamp(12px, 4vw, 20px); max-width: 1200px; margin: 0 auto; width: 100%; }
 .screen { display: none; animation: fadeIn 0.4s var(--ease); }
@@ -213,41 +48,16 @@ main { flex: 1; padding: clamp(12px, 4vw, 20px); max-width: 1200px; margin: 0 au
 .header-text { text-align: center; margin-bottom: clamp(24px, 5vw, 44px); }
 .header-text h1 { font-size: clamp(1.6rem, 5vw, 2.6rem); font-weight: 700; letter-spacing: -0.03em; margin-bottom: 10px; }
 .header-text p { color: var(--text-muted); font-size: clamp(0.85rem, 2vw, 1rem); }
-.badge {
-  background: var(--glass-bg-strong);
-  padding: 4px 12px;
-  border-radius: var(--radius-pill);
-  font-size: 0.78rem;
-  border: 1px solid var(--glass-border);
-  font-weight: 500;
-}
+.badge { background: var(--glass-bg-strong); padding: 4px 12px; border-radius: var(--radius-pill); font-size: 0.78rem; border: 1px solid var(--glass-border); font-weight: 500; }
 
-footer {
-  text-align: center;
-  padding: 22px;
-  color: var(--text-muted);
-  font-size: 0.85rem;
-  border-top: 1px solid var(--glass-border);
-  margin-top: auto;
-}
+footer { text-align: center; padding: 22px; color: var(--text-muted); font-size: 0.85rem; border-top: 1px solid var(--glass-border); margin-top: auto; }
 
+/* 로딩 스피너 */
+.spinner-overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.85); z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: calc(var(--radius-lg) - 8px); color: #fff; gap: 15px; }
+.spinner { width: 50px; height: 50px; border: 4px solid rgba(255, 255, 255, 0.2); border-top-color: var(--accent-color); border-radius: 50%; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* 모션 최소화 설정 존중 */
-@media (prefers-reduced-motion: reduce) {
-  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-}
-
-/* ─────────────────────────────────────────────
-   완전 반응형: 아주 좁은 화면(작은 모바일)에서 헤더 구성요소 축소
-───────────────────────────────────────────── */
-@media (max-width: 480px) {
-  .logo { font-size: 1rem; }
-  .nav-link { padding: 6px 10px; font-size: 0.85rem; }
-  .theme-dot { width: 18px; height: 18px; }
-  .theme-picker { gap: 6px; padding: 5px; }
-}
-
-/* 가로 스크롤 방지: 어떤 창 크기에서도 내용이 넘치지 않도록 */
-html, body { max-width: 100%; overflow-x: hidden; }
-img, svg, video { max-width: 100%; }
+@media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+@media (max-width: 480px) { .logo { font-size: 1rem; } .nav-link { padding: 6px 10px; font-size: 0.85rem; } .theme-dot { width: 18px; height: 18px; } .theme-picker { gap: 6px; padding: 5px; } }
+html, body { max-width: 100%; overflow-x: hidden; } img, svg, video { max-width: 100%; }
