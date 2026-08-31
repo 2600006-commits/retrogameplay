@@ -70,9 +70,14 @@ function loadEmulator(file, core, deviceType) {
     quickLoad: true,
   };
 
-  window.EJS_onGameStart = function() {
-    document.getElementById('loading-spinner').style.display = 'none';
-  };
+ const gameContainer = document.getElementById('game-container');
+  const observer = new MutationObserver((mutations, obs) => {
+    if (gameContainer.querySelector('iframe')) {
+      document.getElementById('loading-spinner').style.display = 'none';
+      obs.disconnect(); // 스피너를 숨긴 후 감지 종료
+    }
+  });
+  observer.observe(gameContainer, { childList: true, subtree: true });
 
   const orientation = (typeof detectOrientation === 'function') ? detectOrientation() : 'landscape';
 
