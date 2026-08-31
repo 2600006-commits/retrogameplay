@@ -53,7 +53,20 @@ main { flex: 1; padding: clamp(12px, 4vw, 20px); max-width: 1200px; margin: 0 au
 footer { text-align: center; padding: 22px; color: var(--text-muted); font-size: 0.85rem; border-top: 1px solid var(--glass-border); margin-top: auto; }
 
 /* 로딩 스피너 */
-.spinner-overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.85); z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: calc(var(--radius-lg) - 8px); color: #fff; gap: 15px; }
+.spinner-overlay { 
+  position: absolute; 
+  inset: 0; 
+  background: rgba(0, 0, 0, 0.85); 
+  z-index: 50; 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  justify-content: center; 
+  border-radius: calc(var(--radius-lg) - 8px); 
+  color: #fff; 
+  gap: 15px; 
+  pointer-events: none; /* 🟢 추가: 스피너가 떠 있어도 클릭이 통과되도록 설정 */
+}
 .spinner { width: 50px; height: 50px; border: 4px solid rgba(255, 255, 255, 0.2); border-top-color: var(--accent-color); border-radius: 50%; animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
