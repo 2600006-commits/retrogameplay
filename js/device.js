@@ -1,30 +1,56 @@
+// 디바이스 타입 판별 함수
 function detectDeviceType() {
   const ua = navigator.userAgent;
   const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0);
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
-  return (isMobile || isTouchDevice) ? 'mobile' : 'desktop';
+  const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+
+  // iPadOS 13+ 는 UA에 "iPad"를 명시하지 않고 데스크톱 Safari인 척 하지만
+  // 실제로는 터치스크린을 갖고 있으므로 isTouchDevice(maxTouchPoints > 0)로 잡힘 → 'mobile' 처리됨
+  return (isMobileUA || isTouchDevice) ? 'mobile' : 'desktop';
 }
 
+// 모바일 중에서도 화면이 큰 기기(아이패드/태블릿)는 여백을 덜 극단적으로 잡아도
+// 가상 버튼이 게임 화면을 가리지 않으므로 phone과 구분해둠 (play.css의 .is-tablet 참고)
+function detectFormFactor() {
+  if (detectDeviceType() !== 'mobile') return 'desktop';
+  const minSide = Math.min(window.innerWidth, window.innerHeight);
+  return minSide >= 600 ? 'tablet' : 'phone';
+}
+
+// 현재 화면 방향 ('landscape' | 'portrait')
 function detectOrientation() {
-  if (window.matchMedia && window.matchMedia('(orientation: landscape)').matches) return 'landscape';
+  if (window.matchMedia && window.matchMedia('(orientation: landscape)').matches) {
+    return 'landscape';
+  }
   return window.innerWidth >= window.innerHeight ? 'landscape' : 'portrait';
 }
 
+// body에 상태 클래스를 반영하고, 방향이 바뀌면 다른 스크립트(emulator.js)가
+// 반응할 수 있도록 커스텀 이벤트를 발행합니다.
+// (요구사항: 가로/세로 모드 + 기기 크기(폰/태블릿)에 따라 가상 조이스틱 배치가
+//  자연스럽게 바뀌고, 어떤 경우에도 실제 게임 화면을 가리지 않도록 함)
 function applyDeviceState() {
   const deviceType = detectDeviceType();
   const orientation = detectOrientation();
+  const formFactor = detectFormFactor();
 
   document.body.classList.toggle('is-mobile-device', deviceType === 'mobile');
+  document.body.classList.toggle('is-tablet-device', formFactor === 'tablet');
   document.body.classList.toggle('is-landscape', orientation === 'landscape');
   document.body.classList.toggle('is-portrait', orientation === 'portrait');
 
-  document.dispatchEvent(new CustomEvent('app:orientationchange', { detail: { deviceType, orientation } }));
-  return { deviceType, orientation };
+  document.dispatchEvent(new CustomEvent('app:orientationchange', {
+    detail: { deviceType, orientation, formFactor }
+  }));
+
+  return { deviceType, orientation, formFactor };
 }
 
+// 화면 방향 감지 (모바일 가로 모드 유도용 - 콘솔 안내)
 function checkOrientation() {
   if (detectDeviceType() === 'mobile' && detectOrientation() === 'portrait') {
     console.warn("가로 모드(Landscape)로 회전하면 더 편하게 플레이할 수 있어요.");
+    // 필요 시 여기에 오버레이 UI를 표시하는 로직 추가 가능
   }
 }
 
@@ -33,6 +59,7 @@ function handleOrientationOrResize() {
   checkOrientation();
 }
 
+// 최초 로드 시점 + 리사이즈/회전 시점 모두 반영
 window.addEventListener('resize', handleOrientationOrResize);
 window.addEventListener('orientationchange', handleOrientationOrResize);
 document.addEventListener('DOMContentLoaded', handleOrientationOrResize);
