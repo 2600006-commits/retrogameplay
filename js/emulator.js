@@ -10,7 +10,10 @@ let currentObjectUrl = null;
 
 // 로딩 인디케이터 / CDN 에러 안내 타이머
 let engineLoadTimeoutId = null;
-const ENGINE_LOAD_TIMEOUT_MS = 20000; // 20초 내 게임이 시작되지 않으면 실패로 간주
+// 이 타이머는 "엔진 UI 자체"(loader.js + emulator.min.js/css)가 뜨는지만 감시합니다.
+// 실제 코어(wasm)·롬 다운로드는 사용자가 EmulatorJS의 Play 버튼을 누른 뒤 시작되며,
+// 그 이후 진행 상황은 EmulatorJS 자체 로딩 화면이 보여주므로 별도로 타임아웃을 걸지 않습니다.
+const ENGINE_LOAD_TIMEOUT_MS = 30000; // 30초 내 엔진 UI가 뜨지 않으면 실패로 간주
 
 // ─────────────────────────────────────────────
 // 모바일 가상 조이스틱 레이아웃
@@ -104,9 +107,14 @@ function showLoadingOverlay(message) {
   overlay.classList.remove('hidden');
 }
 
-function hideLoadingOverlay() {
-  const overlay = document.getElementById('emulator-loading');
-  if (overlay) overlay.classList.add('hidden');
+// 로딩/에러 오버레이를 모두 닫고 타임아웃을 정리합니다.
+// (버그 수정: 이전엔 로딩 오버레이만 닫아서, 타임아웃으로 에러가 먼저 뜬 뒤
+//  뒤늦게 엔진이 실제로 준비돼도 에러 문구가 화면에 계속 남아있었습니다.)
+function hideAllOverlays() {
+  const loading = document.getElementById('emulator-loading');
+  const error = document.getElementById('emulator-error');
+  if (loading) loading.classList.add('hidden');
+  if (error) error.classList.add('hidden');
   if (engineLoadTimeoutId) {
     clearTimeout(engineLoadTimeoutId);
     engineLoadTimeoutId = null;
@@ -114,7 +122,7 @@ function hideLoadingOverlay() {
 }
 
 function showEmulatorError(message) {
-  hideLoadingOverlay();
+  hideAllOverlays();
   const overlay = document.getElementById('emulator-error');
   const text = document.getElementById('emulator-error-text');
   if (text) text.textContent = message;
@@ -130,9 +138,13 @@ function retryEmulatorLoad() {
 // 전체화면 + 가로모드 고정 (모바일 전용)
 // 반드시 사용자 클릭(제스처) 콜스택 안에서 동기적으로 호출되어야
 // 브라우저가 전체화면 요청을 허용합니다.
+// (버그 수정: 이전엔 #crtBezel을 대상으로 했는데, 이 함수가 호출되는 시점엔
+//  #emulator-ui가 아직 display:none 상태라 크롬/사파리가 전체화면 요청을
+//  조용히 거부했습니다. 항상 렌더링되어 있는 document.documentElement를 대상으로
+//  바꿔서 이 경쟁 조건을 근본적으로 없앴습니다.)
 // ─────────────────────────────────────────────
 function requestFullscreenAndLockLandscape() {
-  const el = document.getElementById('crtBezel') || document.documentElement;
+  const el = document.documentElement;
   const requestFS = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
 
   const tryLockOrientation = () => {
@@ -212,13 +224,18 @@ function loadEmulator(file, core, deviceType) {
   // 부모 문서의 :root 변수를 상속받지 못해 깨질 수 있으므로 실제 색상값을 계산해 사용
   window.EJS_color = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim() || '#0a84ff';
 
-  // 게임이 실제로 화면에 뜨는 시점(로딩 완료)에 로딩 오버레이를 닫음
-  window.EJS_onGameStart = function () {
-    hideLoadingOverlay();
+  // (버그 수정) 이전에는 "게임이 실제로 시작된 시점"(EJS_onGameStart)에만 오버레이를 닫았는데,
+  // EmulatorJS는 브라우저의 오디오 자동재생 정책 때문에 기본적으로 로딩이 끝나도
+  // 자동으로 게임을 시작하지 않고 자체 "▶ Play" 화면을 띄운 뒤 사용자의 클릭을 기다립니다.
+  // 그런데 우리 오버레이가 그 Play 화면을 완전히 가리고 있었기 때문에 사용자가 버튼을
+  // 누를 수 없었고, 결국 로딩 타임아웃이 "엔진 로드 실패"로 잘못 표시했습니다.
+  // → 엔진 UI가 준비되는 시점인 EJS_ready에서 오버레이를 닫아 Play 화면이 보이고
+  //   클릭 가능하도록 수정했습니다. (onGameStart는 만약을 위한 이중 안전장치로 유지)
+  window.EJS_ready = function () {
+    hideAllOverlays();
   };
-  // EmulatorJS 자체 에러 콜백 (지원 버전에서 호출됨) - 있으면 우리 에러 오버레이로 통일
-  window.EJS_onLoadError = function () {
-    showEmulatorError('게임을 불러오는 중 오류가 발생했습니다. 롬 파일이 손상되었거나 선택한 코어와 맞지 않을 수 있습니다.');
+  window.EJS_onGameStart = function () {
+    hideAllOverlays();
   };
 
   // 3. 디바이스 환경에 따른 UI 및 컨트롤러 세팅
@@ -256,10 +273,10 @@ function loadEmulator(file, core, deviceType) {
     if (iframe) iframe.focus();
   });
 
-  // 로딩이 너무 오래 걸리면(예: CDN 차단/장애) 사용자에게 안내
+  // 엔진 UI 자체가 너무 오래 걸리면(예: CDN 차단/장애) 사용자에게 안내
+  // (EJS_ready에서 clearTimeout되므로, UI가 정상적으로 뜨면 아래 콜백은 실행되지 않음)
   if (engineLoadTimeoutId) clearTimeout(engineLoadTimeoutId);
   engineLoadTimeoutId = setTimeout(() => {
-    // 이미 게임이 시작되어 오버레이가 닫혔다면(=hidden) 아무 것도 하지 않음
     const overlay = document.getElementById('emulator-loading');
     if (overlay && !overlay.classList.contains('hidden')) {
       showEmulatorError('에뮬레이터 엔진을 불러오지 못했습니다. 광고 차단 확장 프로그램을 꺼보거나 네트워크 연결(방화벽/CDN 차단 여부)을 확인한 뒤 다시 시도해주세요.');
