@@ -1,7 +1,19 @@
 .library-container { padding: clamp(14px, 4vw, 30px); }
 .library-controls { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
-.glass-input { background: var(--glass-bg-strong, rgba(0,0,0,0.2)); border: 1px solid var(--glass-border); color: var(--text-main); padding: 10px 16px; border-radius: var(--radius-md); outline: none; font-size: 0.95rem; transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease); }
-.glass-input:focus { border-color: var(--accent-color); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.2); }
+.glass-input {
+  background: var(--glass-bg-strong, rgba(0,0,0,0.2));
+  border: 1px solid var(--glass-border);
+  color: var(--text-main);
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  outline: none;
+  font-size: 0.95rem;
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+.glass-input:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.2);
+}
 #searchInput { flex: 1; min-width: 160px; }
 .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 table { width: 100%; border-collapse: collapse; text-align: left; min-width: 560px; }
