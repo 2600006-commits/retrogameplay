@@ -344,8 +344,19 @@ async function renderRecentRoms() {
 
 // ─────────────────────────────────────────────
 // 6. PWA: 서비스 워커 등록 (홈 화면에 추가 지원용)
+//    (버그 수정) 예전 캐시 우선(cache-first) 방식의 서비스워커가 등록되어 있던
+//    브라우저는 배포 후에도 계속 낡은 JS를 쓸 수 있었습니다. 새 서비스워커가
+//    활성화(=controllerchange)되면 한 번 자동으로 새로고침해서, 사용자가 직접
+//    캐시를 지우지 않아도 최신 파일로 자연스럽게 넘어가도록 합니다.
 // ─────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
+  let swRefreshed = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (swRefreshed) return; // 무한 새로고침 방지
+    swRefreshed = true;
+    window.location.reload();
+  });
+
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js').catch(() => {
       // 서비스워커 등록 실패는 기능에 필수가 아니므로 조용히 무시

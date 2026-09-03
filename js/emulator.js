@@ -279,7 +279,7 @@ function loadEmulator(file, core, deviceType) {
   engineLoadTimeoutId = setTimeout(() => {
     const overlay = document.getElementById('emulator-loading');
     if (overlay && !overlay.classList.contains('hidden')) {
-      showEmulatorError('에뮬레이터 엔진을 불러오지 못했습니다. 광고 차단 확장 프로그램을 꺼보거나 네트워크 연결(방화벽/CDN 차단 여부)을 확인한 뒤 다시 시도해주세요.');
+      showEmulatorError('에뮬레이터 엔진을 불러오지 못했습니다. 광고 차단 확장 프로그램을 꺼보거나 네트워크 연결(방화벽/CDN 차단 여부)을 확인한 뒤 다시 시도해주세요. (강력 새로고침: Ctrl/Cmd+Shift+R, 계속되면 브라우저 개발자도구(F12) Console 탭의 에러 메시지를 확인해주세요)');
     }
   }, ENGINE_LOAD_TIMEOUT_MS);
 
